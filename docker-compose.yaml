@@ -1,0 +1,14 @@
+name: ClearFacePostgres
+
+services:
+  db:
+    image: bitnami/postgresql:latest
+    environment:
+      POSTGRES_USER: ClearFaceUser
+      POSTGRES_PASSWORD: ClearFace778829
+      POSTGRES_DB: ClearFacePostgres
+
+    restart: unless-stopped
+    ports:
+      - "2654:5432" # externa/interna
+
