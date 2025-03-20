@@ -4,8 +4,12 @@ import { compare, hash } from 'bcryptjs';
 import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.error';
 import { EntityAlreadyExistsError } from 'src/shared/errors/EntityAlreadyExistsError.error';
 import { ValidationError } from 'src/shared/errors/ValidationError.erro';
+import { ADMIN_EMAIL } from 'src/shared/lib/env';
+import { SendEmail } from 'src/shared/lib/nodemailer';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
+import { GenValidationCode } from 'src/shared/utils/genValidCode';
 import { splitStringAtDash } from 'src/shared/utils/SeparateCookieString';
+import { EmailType } from 'src/types/interfaces/emailType';
 
 @Injectable()
 export class UserService {
@@ -98,6 +102,47 @@ export class UserService {
             }
         })
 
+    }
+    async sendRecoveryCode(email:string){
+        const user = await this.prisma.user.findUnique({
+            where:{
+                email
+            },
+            select:{
+                id:true,
+                password:true,
+                name:true
+            }
+        })
+        if(!user){
+            throw new EntityDoesNotExists('User',email);
+        }
+        const code = GenValidationCode()
+        const _email:EmailType = {
+            to:email,
+            subject:"No-Reply Email de recuperação de senha",
+            text:`  Assunto: Recuperação de Senha
+
+                    Olá, ${user.name}
+
+                    Recebemos uma solicitação para redefinir a sua senha.
+
+                    Para continuar, utilize o código abaixo:
+
+                    ${code}
+
+                    Se você não solicitou essa alteração, ignore este e-mail. O código expirará em breve por motivos de segurança.
+
+                    Atenciosamente,
+                    Equipe de suporte.
+                    Dúvidas? Entre em contato: ${ADMIN_EMAIL}
+                `
+        }
+
+        
+        const a = await SendEmail(_email);
+        console.log(a);
+        return `${email}-${code}`//Retornando o email e o código de validação no formato email-codigo
     }
 
 }
