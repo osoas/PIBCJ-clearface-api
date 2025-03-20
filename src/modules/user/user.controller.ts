@@ -1,14 +1,17 @@
-import { Controller, Post, Get, Put, Req, Res, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Put, Req, Res, Body, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { z } from 'zod';
 import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.error';
 import { ValidationError } from 'src/shared/errors/ValidationError.erro';
 import { Request, Response } from 'express';
 import { EntityAlreadyExistsError } from 'src/shared/errors/EntityAlreadyExistsError.error';
+import { AuthService } from '../auth/auth.service';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class UserController {
-    constructor(private UserService: UserService) {}
+    
+    constructor(private UserService: UserService,private authService: AuthService) {}
 
     @Post("register")
     async registerUser(@Req() req: Request, @Res() res: Response) {
@@ -30,11 +33,15 @@ export class UserController {
         }
     }
 
-    @Get("profile/:id")
-    async returnProfile(@Param('id') id: string, @Res() res: Response) {
+    @UseGuards(AuthGuard('jwt'))
+    @Get('profile')
+    async returnProfile(@Req() req:Request, @Res() res: Response) {
+        const token = req.user;
+        console.log(token)
         try {
-            const profile = await this.UserService.returnProfile(id);
-            res.status(200).json(profile);
+            // const profile = await this.UserService.returnProfile(token.id);
+
+            res.status(200).json(token);
         } catch (err) {
             if (err instanceof EntityDoesNotExists) {
                 res.status(404).json({ message: err.message });
@@ -53,7 +60,13 @@ export class UserController {
 
         try {
             const response = await this.UserService.returnIdAfterLogin(email, password);
-            res.status(200).json(response);
+
+            const token = await this.authService.generateToken({id:response.id,name:response.name});
+            //Should generate the funcking token here;
+            res.status(200).json({
+                Description: "User logged in successfully",
+                token: token
+            });
         } catch (err) {
             if (err instanceof EntityDoesNotExists || err instanceof ValidationError) {
                 res.status(401).json({ message: err.message });

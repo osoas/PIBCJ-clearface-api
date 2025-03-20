@@ -57,6 +57,7 @@ export class UserService {
                 email
             },
             select:{
+                name:true,
                 id:true,
                 password:true,
             }
@@ -70,7 +71,7 @@ export class UserService {
         }
         
 
-        return {id:user.id}
+        return {id:user.id,name:user.name}
     }
     async updatePasswordByRecCode(recString:string,newPassword:string,refCode:string){
         const [email,ValCode] = splitStringAtDash(recString)
