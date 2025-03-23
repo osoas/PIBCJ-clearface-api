@@ -36,12 +36,18 @@ export class UserController {
     @UseGuards(AuthGuard('jwt'))
     @Get('profile')
     async returnProfile(@Req() req:Request, @Res() res: Response) {
-        const token = req.user;
-        console.log(token)
+        const {id,username} = z.object({
+            id:z.string({message:"Payload invalido"}).uuid("payload invalido: id nao é uuid"),
+            username:z.string({message:"Payload invalido"}).min(3,"Payload invalido: username deve ter no mínimo 3 caracteres")
+        }).parse(req.user);
+        console.log({id,username})
         try {
-            // const profile = await this.UserService.returnProfile(token.id);
+            const profile = await this.UserService.returnProfile(id);
 
-            res.status(200).json(token);
+            res.status(200).json({
+                Description: "User profile returned successfully",
+                profile
+            });
         } catch (err) {
             if (err instanceof EntityDoesNotExists) {
                 res.status(404).json({ message: err.message });

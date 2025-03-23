@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JWT_EXPIRES_IN, JWT_SECRET } from 'src/shared/lib/env';
 import { AuthService } from './auth.service';
+import { JwtStrategy } from './jwtEstrategy.service';
 
 @Module({
     imports: [
@@ -13,7 +14,7 @@ import { AuthService } from './auth.service';
           signOptions: { expiresIn: JWT_EXPIRES_IN,},
         }),
       ],
-    providers: [AuthService],
+    providers: [AuthService,JwtStrategy],
     exports: [AuthService,JwtModule],
     
 })
