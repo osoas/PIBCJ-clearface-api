@@ -1,0 +1,65 @@
+### Auth - Registro de Usuário
+POST http://127.0.0.1:3456/auth/register
+Content-Type: application/json
+
+{
+  "username": "example",
+  "password": "example123"
+}
+
+### Auth - Perfil de Usuário
+GET http://127.0.0.1:3456/auth/profile
+
+### Auth - Login
+POST http://127.0.0.1:3456/auth/login
+Content-Type: application/json
+
+{
+  "username": "example",
+  "password": "example123"
+}
+
+### Auth - Alteração de Senha
+PUT http://127.0.0.1:3456/auth/password
+Content-Type: application/json
+
+{
+  "oldPassword": "old123",
+  "newPassword": "new123"
+}
+
+### Auth - Recuperação de Senha
+POST http://127.0.0.1:3456/auth/recover
+Content-Type: application/json
+
+{
+  "email": "example@example.com"
+}
+
+### Consultas - Criação
+POST http://127.0.0.1:3456/consultas
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "date": "2025-03-25T14:00:00Z"
+}
+
+### Consultas - Consultas do Usuário
+GET http://127.0.0.1:3456/consultas/user/:user_id
+
+### Consultas - Consulta Específica
+GET http://127.0.0.1:3456/consultas/:id
+
+### Imagens - Upload de Imagem
+POST http://127.0.0.1:3456/images
+Content-Type: application/json
+
+{
+  "appointment_id": 1,
+  "image_url": "http://example.com/image.jpg"
+}
+
+### Imagens - Consultar Imagens por Consulta
+GET http://127.0.0.1:3456/images/appointment/:appointment_id
+
