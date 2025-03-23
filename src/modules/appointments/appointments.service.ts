@@ -19,6 +19,12 @@ export class AppointmentsService {
         }
         const appointment = await this.prisma.appointment.create({
             data,
+            select:{
+                id:true,
+                user_id:false,
+                resultado:false,
+                created_at:true
+            }
         });
 
         return appointment;
@@ -36,6 +42,12 @@ export class AppointmentsService {
         return await this.prisma.appointment.findMany({
             where:{
                 user_id
+            },
+            select:{
+                id:true,
+                user_id:false,
+                resultado:true,
+                created_at:true
             }
         });
     }
@@ -44,6 +56,12 @@ export class AppointmentsService {
         const appointment = await this.prisma.appointment.findUnique({
             where:{
                 id
+            },
+            select:{
+                id:true,
+                user_id:false,
+                resultado:true,
+                created_at:true
             }
         });
         if(!appointment){

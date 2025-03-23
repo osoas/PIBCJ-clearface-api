@@ -1,22 +1,25 @@
-import { Controller, Post, Get, Param, Body, Res } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Res, UseGuards, Req } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { z } from 'zod';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.error';
+import { use } from 'passport';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('consultas')
 export class AppointmentsController {
     constructor(private appointmentsService: AppointmentsService) {}
 
+    @UseGuards(AuthGuard('jwt'))
     @Post()
-    async createAppointment(@Body() body: any, @Res() res: Response) {
-        const { user_id, resultado } = z.object({
-            user_id: z.string(),
-            resultado: z.any(), // Accepts any valid JSON
-        }).parse(body);
+    async createAppointment(@Req() req: Request, @Res() res: Response) {
+        const {id,username} = z.object({
+            id:z.string({message:"Payload invalido"}).uuid("payload invalido: id nao é uuid"),
+            username:z.string({message:"Payload invalido"}).min(3,"Payload invalido: username deve ter no mínimo 3 caracteres")
+        }).parse(req.user);
 
         try {
-            const appointment = await this.appointmentsService.create({ user_id, resultado });
+            const appointment = await this.appointmentsService.create({ user_id:id, resultado:null });
             res.status(201).json(appointment);
         } catch (err) {
             if (err instanceof EntityDoesNotExists) {
@@ -27,11 +30,15 @@ export class AppointmentsController {
         }
     }
 
-    //Mudar isso aqui depois para implementar a autenticação
-    @Get('user/:user_id')
-    async findAppointmentsByUser(@Param('user_id') user_id: string, @Res() res: Response) {
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('user')
+    async findAppointmentsByUser(@Req() req: Request, @Res() res: Response) {
+        const {id} = z.object({
+            id:z.string({message:"Payload invalido"}).uuid("payload invalido: id nao é uuid")}
+        ).parse(req.user);
         try {
-            const appointments = await this.appointmentsService.findManyByUser(user_id);
+            const appointments = await this.appointmentsService.findManyByUser(id);
             res.status(200).json(appointments);
         } catch (err) {
             if (err instanceof EntityDoesNotExists) {
