@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.error';
+import { EntityAlreadyExistsError } from 'src/shared/errors/EntityAlreadyExistsError.error';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
 
 @Injectable()
@@ -14,11 +15,19 @@ export class ImagesService {
                 id:data.appointment_id
             }
         })
-
+        
         if(!doesTheAppointmentExists){
             throw new EntityDoesNotExists("appointment",data.appointment_id)
         }
 
+        const theresAlreadyAnImageForThisAppointment = await this.prisma.image.findFirst({
+            where:{
+                appointment_id:data.appointment_id
+            }
+        })
+        if(theresAlreadyAnImageForThisAppointment){
+            throw new EntityAlreadyExistsError("image",theresAlreadyAnImageForThisAppointment.id)
+        }
         return await this.prisma.image.create({
             data
         })

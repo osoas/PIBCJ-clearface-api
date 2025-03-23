@@ -1,28 +1,38 @@
-import { Controller, Post, Get, Param, Body, Res } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Res, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ImagesService } from './images.service';
 import { z } from 'zod';
 import { Response } from 'express';
 import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.error';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('images')
 export class ImagesController {
     constructor(private ImageService: ImagesService) {}
 
+    @UseInterceptors(FileInterceptor('FaceImage')) 
     @Post()
-    async createImage(@Body() body: any, @Res() res: Response) {
-        const { appointment_id, url } = z.object({
-            appointment_id: z.string(),
-            url: z.string().url("Por favor informe uma URL válida"),
+    async createImage(@UploadedFile() file:Express.Multer.File, @Body() body: any, @Res() res: Response) {
+        const { appointment_id } = z.object({
+
+            appointment_id: z.string({message:"appointment_id is required to be a string"}).cuid({message:"appointment_id is not a valid cuid"}),
+
         }).parse(body);
+
+        const url = file.path; //scr do file após upload
+        console.log("file stored URL:",url)
 
         try {
             const image = await this.ImageService.create({ appointment_id, url });
-            res.status(201).json(image);
+            
+            console.log("image",image)
+
+            res.status(201).json({Description:"Upload concluído com sucesso",image,body});
+
         } catch (err) {
             if (err instanceof EntityDoesNotExists) {
                 res.status(404).json({ message: err.message });
             } else {
-                res.status(500).json({ message: "Internal server error" });
+                res.status(500).json({ message: err.message });
             }
         }
     }
@@ -36,7 +46,7 @@ export class ImagesController {
             if (err instanceof EntityDoesNotExists) {
                 res.status(404).json({ message: err.message });
             } else {
-                res.status(500).json({ message: "Internal server error" });
+                res.status(500).json({ message: err.message });
             }
         }
     }
