@@ -59,19 +59,26 @@ export class UserController {
         }).parse(body);
 
         try {
+            // console.log(email+password)
             const response = await this.UserService.returnIdAfterLogin(email, password);
 
+            console.log(response)
+
             const token = await this.authService.generateToken({id:response.id,name:response.name});
+            console.log(token)
             //Should generate the funcking token here;
             res.status(200).json({
                 Description: "User logged in successfully",
                 token: token
             });
+
         } catch (err) {
-            if (err instanceof EntityDoesNotExists || err instanceof ValidationError) {
-                res.status(401).json({ message: err.message });
+            if (err instanceof EntityDoesNotExists) {
+                res.status(404).json({ Description:"Entity Not Found Error",message: err.message });
+            }else if(err instanceof ValidationError){
+                res.status(401).json({ Description:"Invalid password",message: err.message });
             } else {
-                res.status(500).json({ message: "Internal server error" });
+                res.status(500).json({ message: err.message });
             }
         }
     }
