@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+//Usuário
+model User {
+  id String @id @default(uuid())
+  name String 
+  email String @unique
+  password String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt 
+
+  //Relacionamento
+  appointments Appointment[]
+}
+
+//Consultas
+model Appointment {
+  id String @id @default(cuid())
+  
+  //Dados
+  resultado Json? 
+
+  //Relacionamento
+  user_id String
+  user User @relation(fields: [user_id], references: [id])
+
+  images Image[]
+
+  //Datação
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+}
+
+//Registro de imagens 
+model Image{
+  id String @id @default(cuid())
+  url String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  //Relacionamento
+  appointment_id String @unique //Uma consulta pode ter uma única imagem
+  appointment Appointment @relation(fields: [appointment_id], references: [id])
+}
