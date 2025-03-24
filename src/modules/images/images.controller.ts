@@ -12,17 +12,13 @@ export class ImagesController {
     @UseInterceptors(FileInterceptor('FaceImage')) 
     @Post()
     async createImage(@UploadedFile() file:Express.Multer.File, @Body() body: any, @Res() res: Response) {
-        const { appointment_id } = z.object({
 
-            appointment_id: z.string({message:"appointment_id is required to be a string"}).cuid({message:"appointment_id is not a valid cuid"}),
-
-        }).parse(body);
 
         const url = file.path; //scr do file após upload
         console.log("file stored URL:",url)
 
         try {
-            const image = await this.ImageService.create({ appointment_id, url });
+            const image = await this.ImageService.create({ url });
             
             console.log("image",image)
 

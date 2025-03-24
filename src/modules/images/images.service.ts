@@ -10,24 +10,7 @@ export class ImagesService {
 
 
     async create(data:Prisma.ImageUncheckedCreateInput){
-        const doesTheAppointmentExists = await this.prisma.appointment.findUnique({
-            where:{
-                id:data.appointment_id
-            }
-        })
-        
-        if(!doesTheAppointmentExists){
-            throw new EntityDoesNotExists("appointment",data.appointment_id)
-        }
 
-        const theresAlreadyAnImageForThisAppointment = await this.prisma.image.findFirst({
-            where:{
-                appointment_id:data.appointment_id
-            }
-        })
-        if(theresAlreadyAnImageForThisAppointment){
-            throw new EntityAlreadyExistsError("image",theresAlreadyAnImageForThisAppointment.id)
-        }
         return await this.prisma.image.create({
             data
         })

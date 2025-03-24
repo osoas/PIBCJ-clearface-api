@@ -9,6 +9,14 @@ export class AppointmentsService {
     constructor(private prisma:PrismaService){}
 
     async create(data:Prisma.AppointmentUncheckedCreateInput) {
+        const doesTheImageExist = await this.prisma.image.findUnique({
+            where:{
+                id:data.image_id
+            }
+        })
+        if(!doesTheImageExist){
+            throw new EntityDoesNotExists("Image",data.user_id)
+        }
         const doesTheUserExists = await this.prisma.user.findUnique({
             where:{
                 id:data.user_id

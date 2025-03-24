@@ -137,6 +137,9 @@ export const swaggerDocument: OpenAPIObject = {
         summary: 'Perfil do Usuário',
         tags: ['Auth'],
         security: [{ bearerAuth: [] }],
+        parameters:[
+            {in:"header",name:"JWT Token",required:true,description:"Bearer Token With JWT",schema:{type:"string"}}
+        ],
         description: 'Retorna as informações do usuário autenticado.',
         responses: {
             '200': {
@@ -268,6 +271,30 @@ export const swaggerDocument: OpenAPIObject = {
             tags: ['Consultas'],
             security: [{ bearerAuth: [] }], // JWT Authentication
             description: 'Cria uma nova consulta para o usuário autenticado.',
+            requestBody:{
+              required:true,
+              content:{
+                "application/json":{
+                  example:JSON.parse(`
+                      {
+    "image_id":"cm8ndt8y20000ilfsohp3jiwx"
+}
+                      `),
+                      schema:{
+                        required:["image_id"],
+                        properties:{
+                          image_id:{
+                            type:"string",
+                            description:"ID da imagem associada a consulta",
+                            format:"cuid"
+                          }
+                        }
+                      }
+                },
+                
+              },
+
+            },
             responses: {
               '201': {
                 description: 'Consulta criada com sucesso',
@@ -301,6 +328,9 @@ export const swaggerDocument: OpenAPIObject = {
             summary: 'Obter Consultas do Usuário',
             tags: ['Consultas'],
             security: [{ bearerAuth: [] }],
+            parameters:[
+                {in:"header",name:"JWT Token",required:true,description:"Bearer Token With JWT",schema:{type:"string"}}
+            ],
             description: 'Retorna todas as consultas do usuário autenticado.',
             responses: {
               '200': {
@@ -387,14 +417,9 @@ export const swaggerDocument: OpenAPIObject = {
                       type: 'string', 
                       format: 'binary', 
                       description: 'Arquivo de imagem a ser enviado'
-                    },
-                    appointment_id: {
-                      type: 'string',
-                      description: 'ID da consulta associada à imagem',
-                      pattern: '^[a-zA-Z0-9]{25,}$'
                     }
                   },
-                  required: ['FaceImage', 'appointment_id']
+                  required: ['FaceImage']
                 }
               }
             }
@@ -505,17 +530,18 @@ export const swaggerDocument: OpenAPIObject = {
           id: { type: 'string', format: 'uuid' },
           resultado: { type: 'object', additionalProperties: true, nullable: true },
           user_id: { type: 'string', format: 'uuid' },
+          image_id:{ type:'string',format:'cuid', description:"Id da imagem associado a consulta"},
           user: { $ref: '#/components/schemas/User' },
           created_at: { type: 'string', format: 'date-time' },
           updated_at: { type: 'string', format: 'date-time' }
         }
       },
       Image: {
+        title:"Image",
         type: 'object',
         properties: {
-            id: { type: 'string', format: 'uuid' },
-            url: { type: 'string', format: 'uri' },
-            appointment_id: { type: 'string', format: 'uuid' },
+            id: { type: 'string', format: 'uuid', description:"ID da imagem" },
+            url: { type: 'string', format: 'uri',description:"URL da imagem" },
             created_at: { type: 'string', format: 'date-time' },
             updated_at: { type: 'string', format: 'date-time' }
         }
