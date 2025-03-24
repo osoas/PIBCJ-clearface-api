@@ -38,7 +38,10 @@ model Appointment {
   user_id String
   user User @relation(fields: [user_id], references: [id])
 
-  images Image[]
+  //Imagem
+  image_id String @unique
+  image Image @relation(fields: [image_id], references: [id])
+
 
   //Datação
   created_at DateTime @default(now())
@@ -53,7 +56,7 @@ model Image{
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+
   //Relacionamento
-  appointment_id String @unique //Uma consulta pode ter uma única imagem
-  appointment Appointment @relation(fields: [appointment_id], references: [id])
+  appointment Appointment[]
 }
