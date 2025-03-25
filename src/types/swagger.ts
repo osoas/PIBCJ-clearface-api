@@ -269,7 +269,10 @@ export const swaggerDocument: OpenAPIObject = {
           post: {
             summary: 'Criar Consulta',
             tags: ['Consultas'],
-            security: [{ bearerAuth: [] }], // JWT Authentication
+            security: [{ bearerAuth: [] }], // JWT Authentication,
+            parameters:[
+              {in:"header",name:"JWT Token",required:true,description:"Bearer Token With JWT",schema:{type:"string"}}
+            ],
             description: 'Cria uma nova consulta para o usuário autenticado.',
             requestBody:{
               required:true,
