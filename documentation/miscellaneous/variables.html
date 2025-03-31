@@ -115,6 +115,9 @@
                             <a href="#config" title="src/shared/lib/nodemailer.ts" ><b>config</b>&nbsp;&nbsp;&nbsp;(src/.../nodemailer.ts)</a>
                         </li>
                         <li>
+                            <a href="#swaggerDocument" title="src/types/swagger.ts" ><b>swaggerDocument</b>&nbsp;&nbsp;&nbsp;(src/.../swagger.ts)</a>
+                        </li>
+                        <li>
                             <a href="#transport" title="src/shared/lib/nodemailer.ts" ><b>transport</b>&nbsp;&nbsp;&nbsp;(src/.../nodemailer.ts)</a>
                         </li>
                         <li>
@@ -192,6 +195,586 @@
         </tbody>
     </table>
 </section>
+    <h3>src/types/swagger.ts</h3>
+    <section data-compodoc="block-properties">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="swaggerDocument"></a>
+                    <span class="name">
+                        <span ><b>swaggerDocument</b></span>
+                        <a href="#swaggerDocument"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>    <code>OpenAPIObject</code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>{
+  openapi: &#x27;3.0.0&#x27;,
+  info: {
+    title: &#x27;ClearFaceAPI&#x27;,
+    description: &#x27;ClearFaceAPI - API para reconhecimento facial e análise de acne&#x27;,
+    version: &#x27;1.0&#x27;,
+    contact:{
+        name: &#x27;ClearFaceAPI&#x27;,
+        email: &#x27;cibatech@gmail.com&#x27;,
+    },
+    license:{
+        name: &#x27;MIT&#x27;,
+        url: &#x27;https://opensource.org/licenses/MIT&#x27;,
+    }
+  },
+  tags:[
+    {name:&quot;Auth&quot;,description:&quot;Rotas de autenticação&quot;},
+    {name:&quot;Consultas&quot;,description:&quot;Rotas de consultas&quot;},
+    {name:&quot;Imagens&quot;,description:&quot;Rotas de imagens&quot;}
+  ],
+  paths: {
+    &#x27;/auth/register&#x27;: {
+        post: {
+        summary: &#x27;Registro de Usuário&#x27;,
+        tags: [&#x27;Auth&#x27;],
+        description: &#x27;Cria um novo usuário no sistema.&#x27;,
+        requestBody: {
+            required: true,
+            content: {
+            &#x27;application/json&#x27;: {
+                schema: {
+                type: &#x27;object&#x27;,
+                properties: {
+                    email: { type: &#x27;string&#x27;, format: &#x27;email&#x27;, description: &#x27;E-mail do usuário&#x27; },
+                    name: { type: &#x27;string&#x27;, description: &#x27;Nome do usuário&#x27;, minLength: 3 },
+                    password: { type: &#x27;string&#x27;, description: &#x27;Senha do usuário&#x27;, minLength: 6 }
+                },
+                required: [&#x27;email&#x27;, &#x27;name&#x27;, &#x27;password&#x27;]
+                }
+            }
+            }
+        },
+        responses: {
+            &#x27;201&#x27;: {
+            description: &#x27;Usuário registrado com sucesso&#x27;,
+            content: {
+                &#x27;application/json&#x27;: {
+                schema: { $ref: &#x27;#/components/schemas/User&#x27; }
+                }
+            }
+            },
+            &#x27;409&#x27;: {
+            description: &#x27;Usuário já existe&#x27;,
+            content: {
+                &#x27;application/json&#x27;: {
+                example: { message: &#x27;User already exists&#x27;, description: &#x27;User already exists&#x27; }
+                }
+            }
+            },
+            &#x27;500&#x27;: {
+            description: &#x27;Erro interno no servidor&#x27;,
+            content: {
+                &#x27;application/json&#x27;: {
+                example: { message: &#x27;Internal server error&#x27; }
+                }
+            }
+            }
+        }
+        }
+    },
+    &#x27;/auth/login&#x27;: {
+        post: {
+        summary: &#x27;Login de Usuário&#x27;,
+        tags: [&#x27;Auth&#x27;],
+        description: &#x27;Autentica um usuário e retorna um token JWT.&#x27;,
+        requestBody: {
+            required: true,
+            content: {
+            &#x27;application/json&#x27;: {
+                schema: {
+                type: &#x27;object&#x27;,
+                properties: {
+                    email: { type: &#x27;string&#x27;, format: &#x27;email&#x27;, description: &#x27;E-mail do usuário&#x27; },
+                    password: { type: &#x27;string&#x27;, description: &#x27;Senha do usuário&#x27;, minLength: 6 }
+                },
+                required: [&#x27;email&#x27;, &#x27;password&#x27;]
+                }
+            }
+            }
+        },
+        responses: {
+            &#x27;200&#x27;: {
+            description: &#x27;Login bem-sucedido&#x27;,
+            content: {
+                &#x27;application/json&#x27;: {
+                schema: {
+                    type: &#x27;object&#x27;,
+                    properties: {
+                    Description: { type: &#x27;string&#x27; },
+                    token: { type: &#x27;string&#x27;, description: &#x27;Token JWT gerado para autenticação&#x27; }
+                    }
+                }
+                }
+            }
+            },
+            &#x27;401&#x27;: {
+            description: &#x27;Senha inválida&#x27;,
+            content: {
+                &#x27;application/json&#x27;: {
+                example: { Description: &#x27;Invalid password&#x27;, message: &#x27;Senha incorreta&#x27; }
+                }
+            }
+            },
+            &#x27;404&#x27;: {
+            description: &#x27;Usuário não encontrado&#x27;,
+            content: {
+                &#x27;application/json&#x27;: {
+                example: { Description: &#x27;Entity Not Found Error&#x27;, message: &#x27;Usuário não encontrado&#x27; }
+                }
+            }
+            },
+            &#x27;500&#x27;: {
+            description: &#x27;Erro interno no servidor&#x27;,
+            content: {
+                &#x27;application/json&#x27;: {
+                example: { message: &#x27;Internal server error&#x27; }
+                }
+            }
+            }
+        }
+        }
+    },
+    &#x27;/auth/profile&#x27;: {
+        get: {
+        summary: &#x27;Perfil do Usuário&#x27;,
+        tags: [&#x27;Auth&#x27;],
+        security: [{ bearerAuth: [] }],
+        parameters:[
+            {in:&quot;header&quot;,name:&quot;JWT Token&quot;,required:true,description:&quot;Bearer Token With JWT&quot;,schema:{type:&quot;string&quot;}}
+        ],
+        description: &#x27;Retorna as informações do usuário autenticado.&#x27;,
+        responses: {
+            &#x27;200&#x27;: {
+            description: &#x27;Perfil retornado com sucesso&#x27;,
+            content: {
+                &#x27;application/json&#x27;: {
+                schema: { $ref: &#x27;#/components/schemas/User&#x27; }
+                }
+            }
+            },
+            &#x27;404&#x27;: {
+            description: &#x27;Usuário não encontrado&#x27;,
+            content: {
+                &#x27;application/json&#x27;: {
+                example: { message: &#x27;Usuário não encontrado&#x27; }
+                }
+            }
+            },
+            &#x27;500&#x27;: {
+            description: &#x27;Erro interno no servidor&#x27;,
+            content: {
+                &#x27;application/json&#x27;: {
+                example: { message: &#x27;Internal server error&#x27; }
+                }
+            }
+            }
+        }
+        }
+    },
+    &#x27;/auth/password&#x27;: {
+        put: {
+        summary: &#x27;Alterar Senha&#x27;,
+        tags: [&#x27;Auth&#x27;],
+        description: &#x27;Atualiza a senha de um usuário com um código de recuperação.&#x27;,
+        requestBody: {
+            required: true,
+            content: {
+            &#x27;application/json&#x27;: {
+                schema: {
+                type: &#x27;object&#x27;,
+                properties: {
+                    recString: { type: &#x27;string&#x27;, description: &#x27;Código de recuperação&#x27; },
+                    newPassword: { type: &#x27;string&#x27;, description: &#x27;Nova senha&#x27;, minLength: 6 },
+                    refCode: { type: &#x27;string&#x27;, description: &#x27;Código de referência&#x27; }
+                },
+                required: [&#x27;recString&#x27;, &#x27;newPassword&#x27;, &#x27;refCode&#x27;]
+                }
+            }
+            }
+        },
+        responses: {
+            &#x27;200&#x27;: {
+            description: &#x27;Senha atualizada com sucesso&#x27;,
+            content: {
+                &#x27;application/json&#x27;: {
+                example: { message: &#x27;Password updated successfully&#x27; }
+                }
+            }
+            },
+            &#x27;400&#x27;: {
+            description: &#x27;Erro de validação ou entidade não encontrada&#x27;,
+            content: {
+                &#x27;application/json&#x27;: {
+                example: { message: &#x27;Código de recuperação inválido&#x27; }
+                }
+            }
+            },
+            &#x27;500&#x27;: {
+            description: &#x27;Erro interno no servidor&#x27;,
+            content: {
+                &#x27;application/json&#x27;: {
+                example: { message: &#x27;Internal server error&#x27; }
+                }
+            }
+            }
+        }
+        }
+    },
+    &#x27;/auth/recover&#x27;: {
+    post: {
+      summary: &#x27;Recuperação de Senha&#x27;,
+      tags: [&#x27;Auth&#x27;],
+      description: &#x27;Envia um código de recuperação para o e-mail do usuário.&#x27;,
+      requestBody: {
+        required: true,
+        content: {
+          &#x27;application/json&#x27;: {
+            schema: {
+              type: &#x27;object&#x27;,
+              properties: {
+                email: { type: &#x27;string&#x27;, format: &#x27;email&#x27;, description: &#x27;E-mail do usuário&#x27; }
+              },
+              required: [&#x27;email&#x27;]
+            }
+          }
+        }
+      },
+      responses: {
+        &#x27;200&#x27;: {
+          description: &#x27;Código de recuperação enviado&#x27;,
+          content: {
+            &#x27;application/json&#x27;: {
+              example: { recoveryCode: &#x27;123456&#x27; }
+            }
+          }
+        },
+        &#x27;404&#x27;: {
+          description: &#x27;Usuário não encontrado&#x27;,
+          content: {
+            &#x27;application/json&#x27;: {
+              example: { message: &#x27;Usuário não encontrado&#x27; }
+            }
+          }
+        },
+        &#x27;500&#x27;: {
+          description: &#x27;Erro interno no servidor&#x27;,
+          content: {
+            &#x27;application/json&#x27;: {
+              example: { message: &#x27;Internal server error&#x27; }
+            }
+          }
+        }
+      }
+    }
+    },
+    &#x27;/consultas&#x27;: {
+          post: {
+            summary: &#x27;Criar Consulta&#x27;,
+            tags: [&#x27;Consultas&#x27;],
+            security: [{ bearerAuth: [] }], // JWT Authentication,
+            parameters:[
+              {in:&quot;header&quot;,name:&quot;JWT Token&quot;,required:true,description:&quot;Bearer Token With JWT&quot;,schema:{type:&quot;string&quot;}}
+            ],
+            description: &#x27;Cria uma nova consulta para o usuário autenticado.&#x27;,
+            requestBody:{
+              required:true,
+              content:{
+                &quot;application/json&quot;:{
+                  example:JSON.parse(&#x60;
+                      {
+    &quot;image_id&quot;:&quot;cm8ndt8y20000ilfsohp3jiwx&quot;
+}
+                      &#x60;),
+                      schema:{
+                        required:[&quot;image_id&quot;],
+                        properties:{
+                          image_id:{
+                            type:&quot;string&quot;,
+                            description:&quot;ID da imagem associada a consulta&quot;,
+                            format:&quot;cuid&quot;
+                          }
+                        }
+                      }
+                },
+                
+              },
+
+            },
+            responses: {
+              &#x27;201&#x27;: {
+                description: &#x27;Consulta criada com sucesso&#x27;,
+                content: {
+                  &#x27;application/json&#x27;: {
+                    schema: { $ref: &#x27;#/components/schemas/Appointment&#x27; }
+                  }
+                }
+              },
+              &#x27;404&#x27;: {
+                description: &#x27;Usuário não encontrado&#x27;,
+                content: {
+                  &#x27;application/json&#x27;: {
+                    example: { message: &#x27;Usuário não encontrado&#x27; }
+                  }
+                }
+              },
+              &#x27;500&#x27;: {
+                description: &#x27;Erro interno no servidor&#x27;,
+                content: {
+                  &#x27;application/json&#x27;: {
+                    example: { message: &#x27;Internal server error&#x27; }
+                  }
+                }
+              }
+            }
+          }
+    },
+    &#x27;/consultas/user&#x27;: {
+          get: {
+            summary: &#x27;Obter Consultas do Usuário&#x27;,
+            tags: [&#x27;Consultas&#x27;],
+            security: [{ bearerAuth: [] }],
+            parameters:[
+                {in:&quot;header&quot;,name:&quot;JWT Token&quot;,required:true,description:&quot;Bearer Token With JWT&quot;,schema:{type:&quot;string&quot;}}
+            ],
+            description: &#x27;Retorna todas as consultas do usuário autenticado.&#x27;,
+            responses: {
+              &#x27;200&#x27;: {
+                description: &#x27;Lista de consultas do usuário&#x27;,
+                content: {
+                  &#x27;application/json&#x27;: {
+                    schema: { type: &#x27;array&#x27;, items: { $ref: &#x27;#/components/schemas/Appointment&#x27; } }
+                  }
+                }
+              },
+              &#x27;404&#x27;: {
+                description: &#x27;Usuário não encontrado&#x27;,
+                content: {
+                  &#x27;application/json&#x27;: {
+                    example: { message: &#x27;Usuário não encontrado&#x27; }
+                  }
+                }
+              },
+              &#x27;500&#x27;: {
+                description: &#x27;Erro interno no servidor&#x27;,
+                content: {
+                  &#x27;application/json&#x27;: {
+                    example: { message: &#x27;Internal server error&#x27; }
+                  }
+                }
+              }
+            }
+          }
+    },
+    &#x27;/consultas/{id}&#x27;: {
+          get: {
+            summary: &#x27;Obter Consulta por ID&#x27;,
+            tags: [&#x27;Consultas&#x27;],
+            description: &#x27;Busca uma consulta pelo ID.&#x27;,
+            parameters: [
+              {
+                name: &#x27;id&#x27;,
+                in: &#x27;path&#x27;,
+                required: true,
+                description: &#x27;UUID da consulta&#x27;,
+                schema: { type: &#x27;string&#x27;, format: &#x27;uuid&#x27; }
+              }
+            ],
+            responses: {
+              &#x27;200&#x27;: {
+                description: &#x27;Consulta encontrada&#x27;,
+                content: {
+                  &#x27;application/json&#x27;: {
+                    schema: { $ref: &#x27;#/components/schemas/Appointment&#x27; }
+                  }
+                }
+              },
+              &#x27;404&#x27;: {
+                description: &#x27;Consulta não encontrada&#x27;,
+                content: {
+                  &#x27;application/json&#x27;: {
+                    example: { message: &#x27;Consulta não encontrada&#x27; }
+                  }
+                }
+              },
+              &#x27;500&#x27;: {
+                description: &#x27;Erro interno no servidor&#x27;,
+                content: {
+                  &#x27;application/json&#x27;: {
+                    example: { message: &#x27;Internal server error&#x27; }
+                  }
+                }
+              }
+            }
+    }},
+    &#x27;/images&#x27;: {
+        post: {
+          summary: &#x27;Upload de Imagem&#x27;,
+          tags: [&#x27;Imagens&#x27;],
+          description: &#x27;Faz upload de uma imagem e a associa a uma consulta.&#x27;,
+          requestBody: {
+            required: true,
+            content: {
+              &#x27;multipart/form-data&#x27;: {
+                schema: {
+                  type: &#x27;object&#x27;,
+                  properties: {
+                    FaceImage: { 
+                      type: &#x27;string&#x27;, 
+                      format: &#x27;binary&#x27;, 
+                      description: &#x27;Arquivo de imagem a ser enviado&#x27;
+                    }
+                  },
+                  required: [&#x27;FaceImage&#x27;]
+                }
+              }
+            }
+          },
+          responses: {
+            &#x27;201&#x27;: {
+              description: &#x27;Upload concluído com sucesso&#x27;,
+              content: {
+                &#x27;application/json&#x27;: {
+                  schema: {
+                    type: &#x27;object&#x27;,
+                    properties: {
+                      Description: { type: &#x27;string&#x27; },
+                      image: { $ref: &#x27;#/components/schemas/Image&#x27; }
+                    }
+                  }
+                }
+              }
+            },
+            &#x27;404&#x27;: {
+              description: &#x27;Consulta não encontrada&#x27;,
+              content: {
+                &#x27;application/json&#x27;: {
+                  example: { message: &#x27;Consulta não encontrada&#x27; }
+                }
+              }
+            },
+            &#x27;500&#x27;: {
+              description: &#x27;Erro interno no servidor&#x27;,
+              content: {
+                &#x27;application/json&#x27;: {
+                  example: { message: &#x27;Internal server error&#x27; }
+                }
+              }
+            }
+          }
+        }
+      },
+    &#x27;/images/appointment/{appointment_id}&#x27;: {
+        get: {
+          summary: &#x27;Consultar Imagens por Consulta&#x27;,
+          tags: [&#x27;Imagens&#x27;],
+          description: &#x27;Retorna todas as imagens associadas a uma consulta.&#x27;,
+          parameters: [
+            {
+              name: &#x27;appointment_id&#x27;,
+              in: &#x27;path&#x27;,
+              required: true,
+              description: &#x27;ID da consulta&#x27;,
+              schema: { type: &#x27;string&#x27;, pattern: &#x27;^[a-zA-Z0-9]{25,}$&#x27; }
+            }
+          ],
+          responses: {
+            &#x27;200&#x27;: {
+              description: &#x27;Imagens retornadas com sucesso&#x27;,
+              content: {
+                &#x27;application/json&#x27;: {
+                  schema: {
+                    type: &#x27;array&#x27;,
+                    items: { $ref: &#x27;#/components/schemas/Image&#x27; }
+                  }
+                }
+              }
+            },
+            &#x27;404&#x27;: {
+              description: &#x27;Consulta não encontrada&#x27;,
+              content: {
+                &#x27;application/json&#x27;: {
+                  example: { message: &#x27;Consulta não encontrada&#x27; }
+                }
+              }
+            },
+            &#x27;500&#x27;: {
+              description: &#x27;Erro interno no servidor&#x27;,
+              content: {
+                &#x27;application/json&#x27;: {
+                  example: { message: &#x27;Internal server error&#x27; }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+  components: {
+    securitySchemes: {
+          bearerAuth: {
+            type: &#x27;http&#x27;,
+            scheme: &#x27;bearer&#x27;,
+            bearerFormat: &#x27;JWT&#x27;
+          }
+        },
+      
+    schemas: {
+      User: {
+        type: &#x27;object&#x27;,
+        properties: {
+            id: { type: &#x27;string&#x27;, format: &#x27;uuid&#x27; },
+            name: { type: &#x27;string&#x27; },
+            email: { type: &#x27;string&#x27;, format: &#x27;email&#x27; },
+            created_at: { type: &#x27;string&#x27;, format: &#x27;date-time&#x27; },
+            updated_at: { type: &#x27;string&#x27;, format: &#x27;date-time&#x27; }
+        }
+        },  
+      Appointment: {
+        type: &#x27;object&#x27;,
+        properties: {
+          id: { type: &#x27;string&#x27;, format: &#x27;uuid&#x27; },
+          resultado: { type: &#x27;object&#x27;, additionalProperties: true, nullable: true },
+          user_id: { type: &#x27;string&#x27;, format: &#x27;uuid&#x27; },
+          image_id:{ type:&#x27;string&#x27;,format:&#x27;cuid&#x27;, description:&quot;Id da imagem associado a consulta&quot;},
+          user: { $ref: &#x27;#/components/schemas/User&#x27; },
+          created_at: { type: &#x27;string&#x27;, format: &#x27;date-time&#x27; },
+          updated_at: { type: &#x27;string&#x27;, format: &#x27;date-time&#x27; }
+        }
+      },
+      Image: {
+        title:&quot;Image&quot;,
+        type: &#x27;object&#x27;,
+        properties: {
+            id: { type: &#x27;string&#x27;, format: &#x27;uuid&#x27;, description:&quot;ID da imagem&quot; },
+            url: { type: &#x27;string&#x27;, format: &#x27;uri&#x27;,description:&quot;URL da imagem&quot; },
+            created_at: { type: &#x27;string&#x27;, format: &#x27;date-time&#x27; },
+            updated_at: { type: &#x27;string&#x27;, format: &#x27;date-time&#x27; }
+        }
+        }
+    }
+  }
+}</code>
+                    </td>
+                </tr>
+
+
+        </tbody>
+    </table>
+</section>
     <h3>src/shared/lib/env/index.ts</h3>
     <section data-compodoc="block-properties">
     <h3></h3>    <table class="table table-sm table-bordered">
@@ -211,6 +794,9 @@
     ADMIN_EMAIL: z.string(),
     ADMIN_PASSWORD: z.string(),
     JWT_SECRET: z.string(),
+    PORT:z.string(),
+    HOST:z.string(),
+    JWT_EXPIRES_IN:z.string()
 }).parse(process.env)</code>
                     </td>
                 </tr>

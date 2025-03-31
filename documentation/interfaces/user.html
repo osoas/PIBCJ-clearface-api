@@ -240,16 +240,19 @@ import { JwtService } from &#x27;@nestjs/jwt&#x27;;
 interface user{id:string,name:string}
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(private jwtservice: JwtService) {
+    // console.log(&quot;jwtservice:&quot;, this.jwtservice);
+  }
 
   async generateToken({id,name}:user): Promise&lt;string&gt; {
     const payload &#x3D; { username: name, sub:id };
-    return this.jwtService.sign(payload);
+    console.log(payload)
+    return this.jwtservice.sign(payload);
   }
 
-  async validateUser(payload: any): Promise&lt;any&gt; {
+  async validateUser(payload: any): Promise&lt;user&gt; {
     // Aqui você pode implementar a lógica de validação do usuário
-    return { id: payload.sub, username: payload.username };
+    return { id: payload.sub, name: payload.username };
   }
 }
 </code></pre>

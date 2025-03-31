@@ -3,7 +3,7 @@ import { UserService } from './user.service';
 import { z } from 'zod';
 import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.error';
 import { ValidationError } from 'src/shared/errors/ValidationError.erro';
-import { Request, Response } from 'express';
+import { Request, response, Response } from 'express';
 import { EntityAlreadyExistsError } from 'src/shared/errors/EntityAlreadyExistsError.error';
 import { AuthService } from '../auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -90,13 +90,16 @@ export class UserController {
     }
 
     @Put("password")
-    async updatePasswordByRecCode(@Body() body: any, @Res() res: Response) {
-        const { recString, newPassword, refCode } = z.object({
+    async updatePasswordByRecCode(@Req() req: Request, @Res() res: Response) {
+        const { recString, newPassword } = z.object({
             recString: z.string(),
             newPassword: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
-            refCode: z.string()
-        }).parse(body);
+            
+        }).parse(req.body);
 
+        const refCode = req.cookies["pass_info"]
+        console.log(refCode)
+        
         try {
             await this.UserService.updatePasswordByRecCode(recString, newPassword, refCode);
             res.status(200).json({ message: "Password updated successfully" });
@@ -116,8 +119,11 @@ export class UserController {
         }).parse(body);
 
         try {
-            const recoveryCode = await this.UserService.sendRecoveryCode(email);
-            res.status(200).json({ recoveryCode });
+            const {Code,Email} = await this.UserService.sendRecoveryCode(email);
+
+            response.cookie("pass_info",`${Email}-${Code}`)
+
+            res.status(200).json({ Description:"Successfully sent email"});
         } catch (err) {
             if (err instanceof EntityDoesNotExists) {
                 res.status(404).json({ message: err.message });

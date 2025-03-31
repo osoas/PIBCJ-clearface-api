@@ -161,7 +161,7 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(jwtService: JwtService)</code>
+<code>constructor(jwtservice: JwtService)</code>
                     </td>
                 </tr>
                         <tr>
@@ -184,7 +184,7 @@
                                         </thead>
                                         <tbody>
                                                 <tr>
-                                                        <td>jwtService</td>
+                                                        <td>jwtservice</td>
                                                   
                                                         <td>
                                                                     <code>JwtService</code>
@@ -231,8 +231,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="9"
-                                    class="link-to-prism">src/modules/auth/auth.service.ts:9</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="11"
+                                    class="link-to-prism">src/modules/auth/auth.service.ts:11</a></div>
                         </td>
                     </tr>
 
@@ -299,8 +299,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="14"
-                                    class="link-to-prism">src/modules/auth/auth.service.ts:14</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="17"
+                                    class="link-to-prism">src/modules/auth/auth.service.ts:17</a></div>
                         </td>
                     </tr>
 
@@ -336,7 +336,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;any&gt;</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/user.html" target="_self" >Promise&lt;user&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -358,16 +358,19 @@ import { JwtService } from &#x27;@nestjs/jwt&#x27;;
 interface user{id:string,name:string}
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(private jwtservice: JwtService) {
+    // console.log(&quot;jwtservice:&quot;, this.jwtservice);
+  }
 
   async generateToken({id,name}:user): Promise&lt;string&gt; {
     const payload &#x3D; { username: name, sub:id };
-    return this.jwtService.sign(payload);
+    console.log(payload)
+    return this.jwtservice.sign(payload);
   }
 
-  async validateUser(payload: any): Promise&lt;any&gt; {
+  async validateUser(payload: any): Promise&lt;user&gt; {
     // Aqui você pode implementar a lógica de validação do usuário
-    return { id: payload.sub, username: payload.username };
+    return { id: payload.sub, name: payload.username };
   }
 }
 </code></pre>

@@ -13,5 +13,6 @@ export function splitStringAtDash(inputString:string) {
     const firstPart = inputString.slice(0, dashIndex);
     const secondPart = inputString.slice(dashIndex + 1);
   
+    //First part = email second part =code
     return [firstPart, secondPart];
   }

@@ -168,7 +168,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="6" class="link-to-prism">src/modules/auth/jwtEstrategy.service.ts:6</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="7" class="link-to-prism">src/modules/auth/jwtEstrategy.service.ts:7</a></div>
                             </td>
                         </tr>
 
@@ -203,8 +203,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="15"
-                                    class="link-to-prism">src/modules/auth/jwtEstrategy.service.ts:15</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="16"
+                                    class="link-to-prism">src/modules/auth/jwtEstrategy.service.ts:16</a></div>
                         </td>
                     </tr>
 
@@ -259,6 +259,7 @@
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &#x27;@nestjs/common&#x27;;
 import { PassportStrategy } from &#x27;@nestjs/passport&#x27;;
 import { ExtractJwt, Strategy } from &#x27;passport-jwt&#x27;;
+import { JWT_SECRET } from &#x27;src/shared/lib/env&#x27;;
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -266,7 +267,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: &#x27;minha_chave_secreta&#x27;, // ⚠️ Use variáveis de ambiente para produção
+      secretOrKey: JWT_SECRET, // ⚠️ Use variáveis de ambiente para produção
     });
   }
 

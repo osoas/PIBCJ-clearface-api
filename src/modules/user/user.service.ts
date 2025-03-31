@@ -11,6 +11,11 @@ import { GenValidationCode } from 'src/shared/utils/genValidCode';
 import { splitStringAtDash } from 'src/shared/utils/SeparateCookieString';
 import { EmailType } from 'src/types/interfaces/emailType';
 
+interface returnCookieInformation{
+    Email:string,
+    Code:string
+}
+
 @Injectable()
 export class UserService {
     constructor(private prisma:PrismaService) {}
@@ -104,7 +109,7 @@ export class UserService {
         })
 
     }
-    async sendRecoveryCode(email:string){
+    async sendRecoveryCode(email:string):Promise<returnCookieInformation>{
         const user = await this.prisma.user.findUnique({
             where:{
                 email
@@ -143,7 +148,7 @@ export class UserService {
         
         const a = await SendEmail(_email);
         console.log(a);
-        return `${email}-${code}`//Retornando o email e o código de validação no formato email-codigo
+        return {Code:code,Email:email} //Retornando o email e o código de validação no formato email-codigo
     }
 
 }

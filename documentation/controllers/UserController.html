@@ -302,8 +302,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="55"
-                                    class="link-to-prism">src/modules/user/user.controller.ts:55</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="61"
+                                    class="link-to-prism">src/modules/user/user.controller.ts:61</a></div>
                         </td>
                     </tr>
 
@@ -481,8 +481,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="100"
-                                    class="link-to-prism">src/modules/user/user.controller.ts:100</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="113"
+                                    class="link-to-prism">src/modules/user/user.controller.ts:113</a></div>
                         </td>
                     </tr>
 
@@ -570,8 +570,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="80"
-                                    class="link-to-prism">src/modules/user/user.controller.ts:80</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="93"
+                                    class="link-to-prism">src/modules/user/user.controller.ts:93</a></div>
                         </td>
                     </tr>
 
@@ -671,12 +671,18 @@ export class UserController {
     @UseGuards(AuthGuard(&#x27;jwt&#x27;))
     @Get(&#x27;profile&#x27;)
     async returnProfile(@Req() req:Request, @Res() res: Response) {
-        const token &#x3D; req.user;
-        console.log(token)
+        const {id,username} &#x3D; z.object({
+            id:z.string({message:&quot;Payload invalido&quot;}).uuid(&quot;payload invalido: id nao é uuid&quot;),
+            username:z.string({message:&quot;Payload invalido&quot;}).min(3,&quot;Payload invalido: username deve ter no mínimo 3 caracteres&quot;)
+        }).parse(req.user);
+        console.log({id,username})
         try {
-            // const profile &#x3D; await this.UserService.returnProfile(token.id);
+            const profile &#x3D; await this.UserService.returnProfile(id);
 
-            res.status(200).json(token);
+            res.status(200).json({
+                Description: &quot;User profile returned successfully&quot;,
+                profile
+            });
         } catch (err) {
             if (err instanceof EntityDoesNotExists) {
                 res.status(404).json({ message: err.message });
@@ -694,19 +700,26 @@ export class UserController {
         }).parse(body);
 
         try {
+            // console.log(email+password)
             const response &#x3D; await this.UserService.returnIdAfterLogin(email, password);
 
+            console.log(response)
+
             const token &#x3D; await this.authService.generateToken({id:response.id,name:response.name});
+            console.log(token)
             //Should generate the funcking token here;
             res.status(200).json({
                 Description: &quot;User logged in successfully&quot;,
                 token: token
             });
+
         } catch (err) {
-            if (err instanceof EntityDoesNotExists || err instanceof ValidationError) {
-                res.status(401).json({ message: err.message });
+            if (err instanceof EntityDoesNotExists) {
+                res.status(404).json({ Description:&quot;Entity Not Found Error&quot;,message: err.message });
+            }else if(err instanceof ValidationError){
+                res.status(401).json({ Description:&quot;Invalid password&quot;,message: err.message });
             } else {
-                res.status(500).json({ message: &quot;Internal server error&quot; });
+                res.status(500).json({ message: err.message });
             }
         }
     }
