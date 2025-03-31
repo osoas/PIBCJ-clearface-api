@@ -7,9 +7,7 @@ import { PrismaService } from 'src/shared/prisma/prisma.service';
 
 @Injectable()
 export class ImagesService {
-    constructor(
-        @Inject("CACHE_MANAGER") private CacheManager:Cache,
-        private prisma:PrismaService){}
+    constructor(private prisma:PrismaService){}
 
 
     async create(data:Prisma.ImageUncheckedCreateInput){
@@ -19,7 +17,7 @@ export class ImagesService {
     }
 
     async returnByAppointmentId(appointment_id:string){
-        const cacheAppointment = await this.CacheManager.get("CacheKey")
+
         const doesTheAppointmentExists = await this.prisma.appointment.findUnique({
             where:{
                 id:appointment_id
