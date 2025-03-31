@@ -173,7 +173,7 @@ export const swaggerDocument: OpenAPIObject = {
         put: {
         summary: 'Alterar Senha',
         tags: ['Auth'],
-        description: 'Atualiza a senha de um usuário com um código de recuperação.',
+        description: 'Atualiza a senha de um usuário com um código de recuperação armazenado em cookie.',
         requestBody: {
             required: true,
             content: {
@@ -181,11 +181,10 @@ export const swaggerDocument: OpenAPIObject = {
                 schema: {
                 type: 'object',
                 properties: {
-                    recString: { type: 'string', description: 'Código de recuperação' },
-                    newPassword: { type: 'string', description: 'Nova senha', minLength: 6 },
-                    refCode: { type: 'string', description: 'Código de referência' }
+                    refCode: { type: 'string', description: 'Código de recuperação' },
+                    newPassword: { type: 'string', description: 'Nova senha', minLength: 6 }
                 },
-                required: ['recString', 'newPassword', 'refCode']
+                required: ['refCode', 'newPassword']
                 }
             }
             }
@@ -222,7 +221,7 @@ export const swaggerDocument: OpenAPIObject = {
     post: {
       summary: 'Recuperação de Senha',
       tags: ['Auth'],
-      description: 'Envia um código de recuperação para o e-mail do usuário.',
+      description: 'Envia um código de recuperação para o e-mail do usuário e armazena referência em cookie.',
       requestBody: {
         required: true,
         content: {
@@ -239,10 +238,10 @@ export const swaggerDocument: OpenAPIObject = {
       },
       responses: {
         '200': {
-          description: 'Código de recuperação enviado',
+          description: 'Código de recuperação enviado e armazenado em cookie',
           content: {
             'application/json': {
-              example: { recoveryCode: '123456' }
+              example: { Description: 'Successfully sent email' }
             }
           }
         },
@@ -263,8 +262,7 @@ export const swaggerDocument: OpenAPIObject = {
           }
         }
       }
-    }
-    },
+    }},
     '/consultas': {
           post: {
             summary: 'Criar Consulta',

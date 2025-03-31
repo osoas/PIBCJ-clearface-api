@@ -91,13 +91,13 @@ export class UserController {
 
     @Put("password")
     async updatePasswordByRecCode(@Req() req: Request, @Res() res: Response) {
-        const { recString, newPassword } = z.object({
-            recString: z.string(),
-            newPassword: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+        const { refCode, newPassword } = z.object({
+            refCode: z.string({message:"Voce precisa forneceer uma string com o código"}),
+            newPassword: z.string({message:"Voce precisa fornecer uma nova senha"}).min(6, "A senha deve ter no mínimo 6 caracteres"),
             
         }).parse(req.body);
 
-        const refCode = req.cookies["pass_info"]
+        const recString = req.cookies["pass_info"]
         console.log(refCode)
         
         try {
