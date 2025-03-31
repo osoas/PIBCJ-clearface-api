@@ -1,22 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { Cache } from 'cache-manager';
 import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.error';
 import { EntityAlreadyExistsError } from 'src/shared/errors/EntityAlreadyExistsError.error';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
 
 @Injectable()
 export class ImagesService {
-    constructor(private prisma:PrismaService){}
+    constructor(
+        @Inject("CACHE_MANAGER") private CacheManager:Cache,
+        private prisma:PrismaService){}
 
 
     async create(data:Prisma.ImageUncheckedCreateInput){
-
         return await this.prisma.image.create({
             data
         })
     }
 
     async returnByAppointmentId(appointment_id:string){
+        const cacheAppointment = await this.CacheManager.get("CacheKey")
         const doesTheAppointmentExists = await this.prisma.appointment.findUnique({
             where:{
                 id:appointment_id

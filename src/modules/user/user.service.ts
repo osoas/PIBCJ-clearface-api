@@ -1,6 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { CacheInterceptor } from '@nestjs/cache-manager';
+import { Inject, Injectable, UseInterceptors } from '@nestjs/common';
+import { Prisma, User } from '@prisma/client';
 import { compare, hash } from 'bcryptjs';
+import { Cache } from 'cache-manager';
+import e from 'express';
 import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.error';
 import { EntityAlreadyExistsError } from 'src/shared/errors/EntityAlreadyExistsError.error';
 import { ValidationError } from 'src/shared/errors/ValidationError.erro';
@@ -11,11 +14,26 @@ import { GenValidationCode } from 'src/shared/utils/genValidCode';
 import { splitStringAtDash } from 'src/shared/utils/SeparateCookieString';
 import { EmailType } from 'src/types/interfaces/emailType';
 
+interface returnCookieInformation{
+    Email:string,
+    Code:string
+}
+interface restrictUser{
+    name: string;
+    email: string;
+    created_at: Date;
+    updated_at: Date;
+}
+
 @Injectable()
 export class UserService {
-    constructor(private prisma:PrismaService) {}
 
-    async create(data:Prisma.UserCreateInput) {
+    constructor(
+        @Inject('CACHE_MANAGER') private cacheManager:Cache, //Injeta o cache manager
+        private prisma:PrismaService
+    ) {}
+
+    async create(data:Prisma.UserCreateInput):Promise<restrictUser> {
         const doesTheUserAlreadyExist = await this.prisma.user.findUnique({
             where: {
                 email: data.email
@@ -28,29 +46,47 @@ export class UserService {
 
         const _password = await hash(password,9); //hashing the password
         const _data:Prisma.UserCreateInput = {email,name,password:_password,appointments,created_at}
-
-        return this.prisma.user.create({data:_data});
+        const newUser = await this.prisma.user.create({data:_data});
+        await this.cacheManager.set(`profile:${newUser.id}`, newUser);
+        return {
+            created_at:newUser.created_at,email,name,updated_at:newUser.updated_at
+        }
     }
-    async returnProfile(id:string){
-        const user = await this.prisma.user.findUnique({
-            where:{
-                id
-            },
-            select:{
-                id:false,
-                name:true,
-                email:true,
-                password:false,
-                created_at:true,
-                updated_at:true}
-        })
+    async returnProfile(id:string):Promise<restrictUser>{
+        //Checa se o profile está guardado em cache e se estiver retorna o perfil que já está em cache ao invés de carregar novamente o mesmo perfil
+        const cacheProfile = await this.cacheManager.get<User>(`profile:${id}`) as User
+        
+        var user:User
+        if(cacheProfile){
+            if(cacheProfile.id == id ){
+                const {created_at,email,name,updated_at} = cacheProfile
+
+                return {created_at,email,name,updated_at}
+            }
+            user = await this.prisma.user.findUnique({
+                where:{
+                    id
+                }
+            })
+        }else{
+            user = await this.prisma.user.findUnique({
+                where:{
+                    id
+                }
+            })
+        }
 
         if(!user){
             throw new EntityDoesNotExists('User',id);
         }
 
-        return user
+        const {created_at,email,name,updated_at} = user
+
+        await this.cacheManager.set(`profile:${id}`, user);
+
+        return {created_at,email,name,updated_at}
     }
+
     async returnIdAfterLogin(email:string,password:string){
         const user = await this.prisma.user.findUnique({
             where:{
@@ -70,21 +106,25 @@ export class UserService {
             throw new ValidationError('Invalid password');
         }
         
-
+        await this.cacheManager.set(`profile:${user.id}`,user)
         return {id:user.id,name:user.name}
     }
-    async updatePasswordByRecCode(recString:string,newPassword:string,refCode:string){
+    async updatePasswordByRecCode(recString:string,newPassword:string,refCode:string):Promise<restrictUser>{
         const [email,ValCode] = splitStringAtDash(recString)
-
-        const user = await this.prisma.user.findUnique({
-            where:{
-                email
-            },
-            select:{
-                id:true,
-                password:true,
+        var user:User
+        const cacheUser = await this.cacheManager.get("userEmail") as User
+        if(cacheUser){
+            if(cacheUser.email==email){
+                user = cacheUser
             }
-        })
+        }else{
+            user = await this.prisma.user.findUnique({
+                where:{
+                    email
+                }
+            })
+        }
+
         if(!user){
             throw new EntityDoesNotExists('User',email);
         }
@@ -102,9 +142,12 @@ export class UserService {
                 password:await hash(newPassword,9)
             }
         })
-
+        const {created_at,name,updated_at} = updateUser
+        
+        await this.cacheManager.set("userEmail",{created_at,email,name,updated_at})
+        return {created_at,email,name,updated_at} 
     }
-    async sendRecoveryCode(email:string){
+    async sendRecoveryCode(email:string):Promise<returnCookieInformation>{
         const user = await this.prisma.user.findUnique({
             where:{
                 email
@@ -143,7 +186,7 @@ export class UserService {
         
         const a = await SendEmail(_email);
         console.log(a);
-        return `${email}-${code}`//Retornando o email e o código de validação no formato email-codigo
+        return {Code:code,Email:email} //Retornando o email e o código de validação no formato email-codigo
     }
 
 }

@@ -1,8 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { HOST, PORT } from './shared/lib/env';
+import { COOKIE_SECRET, HOST, PORT } from './shared/lib/env';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { swaggerDocument } from './types/swagger';
+import * as cookieParser from 'cookie-parser';
 
 
 async function bootstrap() {
@@ -20,6 +21,9 @@ async function bootstrap() {
     .build();
   //const document = SwaggerModule.createDocument(app, config); //it will create an atomatic documentation based on the config but less customizable
   
+  //Enable cookies Use
+  app.use(cookieParser(COOKIE_SECRET))
+
   SwaggerModule.setup('docs', app, swaggerDocument);
 
   await app.listen(PORT ?? 3000,HOST,()=>{
