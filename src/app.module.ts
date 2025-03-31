@@ -7,7 +7,6 @@ import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { ImagesModule } from './modules/images/images.module';
 import { ImagesService } from './modules/images/images.service';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-yet';
 
 
 // @UseInterceptors(CacheInterceptor) learn this later (in future this allows us to don't even look at services level)
