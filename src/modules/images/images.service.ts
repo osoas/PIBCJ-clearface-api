@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Image, Prisma } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.error';
 import { EntityAlreadyExistsError } from 'src/shared/errors/EntityAlreadyExistsError.error';
@@ -29,6 +29,18 @@ export class ImagesService {
         }
    
         return doesTheAppointmentExists
+    }
+    async returnByImageId(ImageId:string):Promise<Image>{
+        const Image = await this.prisma.image.findUnique({
+            where:{
+                id:ImageId
+            }
+        })
+        if(!Image){
+            throw new EntityDoesNotExists("Image",ImageId)
+        }
+
+        return Image
     }
     
 }

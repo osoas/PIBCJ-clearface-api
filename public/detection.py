@@ -82,7 +82,7 @@ def process_image(image_path, model, conf=.25):
         json.dump(result_data, f, indent=4, ensure_ascii=False)
 
     image_with_crosshairs = draw_crosshairs(image_path, detected_boxes)
-    image_with_crosshairs.save(os.path.join(output_folder, "detected_image.jpg"))
+    image_with_crosshairs.convert("RGB").save(os.path.join(output_folder, "detected_image.jpg"))
 
     return json.dumps({"success": True, "created_folder": output_folder}, indent=4, ensure_ascii=False)
 

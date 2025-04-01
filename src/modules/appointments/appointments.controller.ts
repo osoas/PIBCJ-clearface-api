@@ -5,30 +5,62 @@ import { Response, Request } from 'express';
 import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.error';
 import { use } from 'passport';
 import { AuthGuard } from '@nestjs/passport';
+import { log } from 'console';
+import { PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
+import { UniqueIndexViolatedError } from 'src/shared/errors/UniqueIndexViolated';
+import { DetectionServices } from './detections.service';
+import { PythonFileRunningError } from 'src/shared/errors/PythonFileRunninError';
+import { detectionPrefabJson } from 'src/types/interfaces/jsonResponseType';
+import { ImagesService } from '../images/images.service';
 
 @Controller('consultas')
 export class AppointmentsController {
-    constructor(private appointmentsService: AppointmentsService) {}
+    constructor(private appointmentsService: AppointmentsService,private detectionService:DetectionServices,private ImageService:ImagesService) {}
 
     @UseGuards(AuthGuard('jwt'))
     @Post()
     async createAppointment(@Req() req: Request, @Res() res: Response) {
+        
         const {id,username} = z.object({
             id:z.string({message:"Payload invalido"}).uuid("payload invalido: id nao é uuid"),
             username:z.string({message:"Payload invalido"}).min(3,"Payload invalido: username deve ter no mínimo 3 caracteres"),
             
         }).parse(req.user);
+
         const {image_id} = z.object({
             image_id:z.string({message:'Need to provide a image_id'}).cuid("image_id invalido (cuid)")
         }).parse(req.body);
+
         try {
-            const appointment = await this.appointmentsService.create({ image_id,user_id:id, resultado:null });
-            res.status(201).json(appointment);
+            const image = await this.ImageService.returnByImageId(image_id)
+
+            log(`created appointment, displayed at: ${image.url}`)
+
+            //Detect
+            const JSONResponse = await this.detectionService.solveAppointment(image.url)
+            // log(JSONResponse)
+            // const toJson:detectionPrefabJson = JSON.parse(JSONResponse)
+            
+            // log(toJson.created_folder)
+
+            //Load Detect Result
+            const detectionResult = await this.detectionService.loadResult("detection01")
+            log(detectionResult)
+
+            const result = await this.appointmentsService.create({ image_id,user_id:id, resultado:detectionResult });
+            
+            res.status(201).json(result.CreatedAppointment);
         } catch (err) {
             if (err instanceof EntityDoesNotExists) {
                 res.status(404).json({ message: err.message });
+            }else if(err instanceof PrismaClientUnknownRequestError){
+                res.status(404).json({ message: "PrismaError" });
+            }else if(err instanceof UniqueIndexViolatedError){
+                res.status(401).send({Description:"Chave unica violada",message:err.message})
+            }else if(err instanceof PythonFileRunningError){
+                res.status(500).send({DescriptioN:"Erro ao rodar detecção python",message:err.message})
             } else {
-                res.status(500).json({ message: "Internal server error" });
+                res.status(500).json({ message: "Internal server error",err:err.message });
             }
         }
     }
