@@ -8,5 +8,5 @@ export const {ADMIN_EMAIL,ADMIN_PASSWORD,JWT_SECRET,HOST,PORT,JWT_EXPIRES_IN,COO
     PORT:z.string(),
     HOST:z.string(),
     JWT_EXPIRES_IN:z.string(),
-    COOKIE_SECRET:z.string().default("ClearFaceSecret")
+    COOKIE_SECRET:z.string()
 }).parse(process.env)

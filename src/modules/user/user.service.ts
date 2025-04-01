@@ -82,7 +82,7 @@ export class UserService {
 
         const {created_at,email,name,updated_at} = user
 
-        await this.cacheManager.set(`profile:${id}`, user);
+        await this.cacheManager.set(`profile:${id}`, user,30*1000);
 
         return {created_at,email,name,updated_at}
     }
@@ -91,11 +91,6 @@ export class UserService {
         const user = await this.prisma.user.findUnique({
             where:{
                 email
-            },
-            select:{
-                name:true,
-                id:true,
-                password:true,
             }
         })
         if(!user){
@@ -106,7 +101,7 @@ export class UserService {
             throw new ValidationError('Invalid password');
         }
         
-        await this.cacheManager.set(`profile:${user.id}`,user)
+        await this.cacheManager.set(`profile:${user.id}`,user,30*1000)
         return {id:user.id,name:user.name}
     }
     async updatePasswordByRecCode(recString:string,newPassword:string,refCode:string):Promise<restrictUser>{
