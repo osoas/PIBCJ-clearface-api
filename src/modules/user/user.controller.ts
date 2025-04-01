@@ -120,15 +120,16 @@ export class UserController {
 
         try {
             const {Code,Email} = await this.UserService.sendRecoveryCode(email);
-
-            response.cookie("pass_info",`${Email}-${Code}`)
+            
+            res.cookie("pass_info",`${Email}-${Code}`)
 
             res.status(200).json({ Description:"Successfully sent email"});
+
         } catch (err) {
             if (err instanceof EntityDoesNotExists) {
                 res.status(404).json({ message: err.message });
             } else {
-                res.status(500).json({ message: "Internal server error" });
+                res.status(500).json({ message: "Internal server error", err:err.message});
             }
         }
     }

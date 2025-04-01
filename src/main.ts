@@ -22,7 +22,7 @@ async function bootstrap() {
   //const document = SwaggerModule.createDocument(app, config); //it will create an atomatic documentation based on the config but less customizable
   
   //Enable cookies Use
-  app.use(cookieParser(COOKIE_SECRET))
+  app.use(cookieParser("ClearFaceAPI"))
 
   SwaggerModule.setup('docs', app, swaggerDocument);
 
