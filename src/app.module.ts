@@ -1,4 +1,4 @@
-import { Module, UseInterceptors } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { PrismaService } from './shared/prisma/prisma.service';
 import { UserService } from './modules/user/user.service';
 import { UserModule } from './modules/user/user.module';
@@ -6,7 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { ImagesModule } from './modules/images/images.module';
 import { ImagesService } from './modules/images/images.service';
-import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
+import { CacheModule } from '@nestjs/cache-manager';
 
 
 // @UseInterceptors(CacheInterceptor) learn this later (in future this allows us to don't even look at services level)
