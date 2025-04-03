@@ -8,7 +8,9 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "predeploy": "cd public && bash config_virtual.sh",
+
+    "predeploy":"cd public && bash config_virtual.sh",
+
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
