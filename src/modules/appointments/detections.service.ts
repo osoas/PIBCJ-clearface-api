@@ -16,7 +16,8 @@ export class DetectionServices{
     }
 
     async solveAppointment(imagePath: string): Promise<string | null> {
-        const command = `python ${this.detectionMethodPath} ${imagePath}`;
+        
+        const command = `python3 ${this.detectionMethodPath} ${imagePath}`;
         log(`Executing command: ${command}`);
 
         try {

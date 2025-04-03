@@ -93,4 +93,3 @@ if __name__ == "__main__":
     result = detect(args.image_path, args.consult_id)
     print(result)
 
-
