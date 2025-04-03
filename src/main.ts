@@ -29,5 +29,6 @@ async function bootstrap() {
   await app.listen(PORT ?? 3000,HOST,()=>{
     console.log(`\nClearFaceAPI running on ${HOST} port ${process.env.PORT ?? 3000} full adress \u001b[34m http://${HOST}:${process.env.PORT ?? 3000} \u001b[0m\ncheck documentation \u001b[34m http://${HOST}:${process.env.PORT ?? 3000}/docs \u001b[0m\n`);
   });
+  
 }
 bootstrap();

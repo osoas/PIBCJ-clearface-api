@@ -1,13 +1,11 @@
 import { Controller, Post, Get, Param, Body, Res, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ImagesService } from './images.service';
-import { z } from 'zod';
 import { Response } from 'express';
 import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.error';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import * as sharp from 'sharp';
 import { join } from 'path';
-import { log } from 'console';
+
 
 
 @Controller('images')
@@ -16,6 +14,7 @@ export class ImagesController {
 
     @UseInterceptors(FileInterceptor('FaceImage',{
         fileFilter: (req, file, cb) => {
+            console.log(file)
             if (!file.mimetype.startsWith('image/')) {
                 return cb(new Error('Apenas arquivos de imagem são permitidos!'), false);
             }
@@ -32,8 +31,10 @@ export class ImagesController {
     @Post()
     async createImage(@UploadedFile() file:Express.Multer.File, @Body() body: any, @Res() res: Response) {
         if (!file) {
+            console.log(file)
             return res.status(400).json({ message: 'Nenhuma imagem enviada!' });
         }
+        
         const filePath = join(__dirname+"../../../../",file.destination+"/"+file.filename)
 
         try {
