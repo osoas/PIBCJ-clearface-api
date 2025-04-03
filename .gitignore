@@ -64,3 +64,6 @@ documentation
 
 # Detecções
 detections
+
+## Keep python venv out of git
+public/venv
