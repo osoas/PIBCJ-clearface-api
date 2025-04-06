@@ -13,6 +13,7 @@ import { PythonFileRunningError } from 'src/shared/errors/PythonFileRunninError'
 import { detectionPrefabJson } from 'src/types/interfaces/jsonResponseType';
 import { ImagesService } from '../images/images.service';
 import { randomUUID } from 'crypto';
+import { ExpectedAppointmentResult } from 'src/types/interfaces/expectedAppointmentResult';
 
 @Controller('consultas')
 export class AppointmentsController {
@@ -100,4 +101,34 @@ export class AppointmentsController {
             }
         }
     }
+
+    @Get(':id/imagem')
+    async findAppointmentResultImage(@Req() req:Request, @Res() res: Response) {
+        const {id} = z.object({
+            id:z.string({message:"Payload invalido"}).cuid("payload invalido: id nao é uuid")}
+        ).parse(req.params);
+
+        try{
+            const appointment = await this.appointmentsService.findUnique(id);
+            const {
+                image,
+                iga_score,
+                image_path,
+                acne_quantity,
+                detected_classes
+              } = appointment.resultado as unknown as ExpectedAppointmentResult;
+            
+            const imageBuffer = await this.detectionService.loadImageBufferResult(image_path)
+            res.setHeader('Content-Type', 'image/jpeg');
+            res.setHeader('Content-Disposition', `attachment; filename=resultimage.jpg`);
+            res.status(200).send(imageBuffer);
+        }catch(err){
+            if (err instanceof EntityDoesNotExists) {
+                res.status(404).json({ message: err.message, description: "Imagem não encontrada" });
+            } else {
+                res.status(500).json({ message: "Internal server error" , err:err.message});
+            }
+        }
+
+    }   
 }

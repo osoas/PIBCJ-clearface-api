@@ -10,6 +10,7 @@ import { promisify } from "util";
 @Injectable()
 export class DetectionServices{
     private outputPath = join(__dirname,"../../../detections")
+    private sourcePath = join(__dirname,"../../../")
     private detectionMethodPath = join(__dirname,"../../../public/detection.py")
     constructor(){
         //log(this.detectionMethodPath)
@@ -57,6 +58,22 @@ export class DetectionServices{
             return JSON.parse(fileContent);
         } catch (error) {
             throw new Error(`Erro ao interpretar JSON: ${error.message}`);
+        }
+    }
+
+    async loadImageBufferResult(detectionResultFolder:string){
+        const imageFilePath = join(this.sourcePath, detectionResultFolder);
+        log(`Image Path Folder: ${imageFilePath}`);
+
+        
+        if (!existsSync(imageFilePath)) {
+            throw new Error(`Arquivo de imagem não encontrado em: ${imageFilePath}`);
+        }
+
+        try {
+            return readFileSync(imageFilePath);
+        } catch (error) {
+            throw new Error(`Erro ao ler arquivo de imagem: ${error.message}`);
         }
     }
 }   

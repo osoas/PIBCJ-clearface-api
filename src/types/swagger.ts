@@ -402,6 +402,77 @@ export const swaggerDocument: OpenAPIObject = {
               }
             }
     }},
+    "/consultas/{id}/imagem": {
+      "get": {
+        "tags": ["Consultas"],
+        "summary": "Retorna a imagem processada da consulta",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID da consulta (formato CUID)",
+            "schema": {
+              "type": "string",
+              "example": "cm9639mnm0002il78162v2ips"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Imagem retornada com sucesso (formato JPG)",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Consulta não encontrada ou imagem ausente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Consulta não encontrada"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Imagem não encontrada"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Internal server error"
+                    },
+                    "err": {
+                      "type": "string",
+                      "example": "Descrição do erro"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     '/images': {
         post: {
           summary: 'Upload de Imagem',

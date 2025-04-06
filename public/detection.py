@@ -91,7 +91,7 @@ def process_image(image_path, model, consulta_id, conf=0.25):
 
 def detect(image_path, consulta_id):
     """Runs acne detection on the given image with a specific consultation ID"""
-    model = YOLO("/home/smoveisserver/hercules/PIBIC_Jr/thierrir/API/PIBCJ-clearface-api/public/best.pt")
+    model = YOLO("C:/programacao/clear-face-api/public/best.pt")
 
     json_result = process_image(image_path, model, consulta_id)
     return json_result
