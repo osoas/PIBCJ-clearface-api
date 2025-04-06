@@ -12,6 +12,7 @@ import { DetectionServices } from './detections.service';
 import { PythonFileRunningError } from 'src/shared/errors/PythonFileRunninError';
 import { detectionPrefabJson } from 'src/types/interfaces/jsonResponseType';
 import { ImagesService } from '../images/images.service';
+import { randomUUID } from 'crypto';
 
 @Controller('consultas')
 export class AppointmentsController {
@@ -20,6 +21,7 @@ export class AppointmentsController {
     @UseGuards(AuthGuard('jwt'))
     @Post()
     async createAppointment(@Req() req: Request, @Res() res: Response) {
+        
         
         const {id,username} = z.object({
             id:z.string({message:"Payload invalido"}).uuid("payload invalido: id nao é uuid"),
@@ -32,19 +34,20 @@ export class AppointmentsController {
         }).parse(req.body);
 
         try {
+            
             const image = await this.ImageService.returnByImageId(image_id)
 
             log(`created appointment, displayed at: ${image.url}`)
 
             //Detect
-            const JSONResponse = await this.detectionService.solveAppointment(image.url)
+            const JSONResponse = await this.detectionService.solveAppointment(image.url,image.id)
             // log(JSONResponse)
             // const toJson:detectionPrefabJson = JSON.parse(JSONResponse)
             
             // log(toJson.created_folder)
 
             //Load Detect Result
-            const detectionResult = await this.detectionService.loadResult("detection01")
+            const detectionResult = await this.detectionService.loadResult(image.id)
             log(detectionResult)
 
             const result = await this.appointmentsService.create({ image_id,user_id:id, resultado:detectionResult });

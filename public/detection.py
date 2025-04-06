@@ -23,12 +23,12 @@ def draw_crosshairs(image_path, boxes, classes):
     image = Image.open(image_path)
     draw = ImageDraw.Draw(image)
     class_colors = {
-        1: "#d4d4d4",  # Dark Spots
-        0: "#f4cccc",  # Blackheads
-        5: "#f4cccc",  # Whiteheads
-        3: "#ea9999",  # Papules
-        4: "#cc6666",  # Pustules
-        2: "#990000"   # Nodules
+        5: "#7DFABE",  # Whiteheads
+        1: "#6AE899",  # Dark Spots
+        3: "#76DB9B",  # Papules
+        0: "#56FF95",  # Blackheads
+        4: "#30B27F",  # Pustules
+        2: "#1F7A5D"   # Nodules
     }
     
     def draw_corner_lines(x, y, sign_x, sign_y, color, size):
@@ -61,11 +61,23 @@ def process_image(image_path, model, consulta_id, conf=0.25):
     
     output_folder = get_next_folder(consulta_folder)
     os.makedirs(output_folder)
-    
+    detected_image_path = os.path.join(output_folder, "detected_image.jpg")
     json_path = os.path.join(output_folder, "result.json")
+    acne_labels = {
+        5: "Cravos Brancos",   # Whiteheads
+        1: "Manchas Escuras",  # Dark Spots
+        3: "Pápulas",          # Papules
+        0: "Cravos Pretos",    # Blackheads
+        4: "Pústulas",         # Pustules
+        2: "Nódulos"           # Nodules
+    }
+    acne_count = Counter(detected_classes)
+    acne_quantity = {acne_labels[cls]: acne_count.get(cls, 0) for cls in acne_labels}
     result_data = {
         "image": os.path.basename(image_path),
+        "image_path": detected_image_path,
         "detected_classes": detected_classes,
+        "acne_quantity": acne_quantity,
         "iga_score": iga_score
     }
     
@@ -79,7 +91,8 @@ def process_image(image_path, model, consulta_id, conf=0.25):
 
 def detect(image_path, consulta_id):
     """Runs acne detection on the given image with a specific consultation ID"""
-    model = YOLO("best.pt")
+    model = YOLO("/home/smoveisserver/hercules/PIBIC_Jr/thierrir/API/PIBCJ-clearface-api/public/best.pt")
+
     json_result = process_image(image_path, model, consulta_id)
     return json_result
 

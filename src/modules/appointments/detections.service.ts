@@ -15,9 +15,9 @@ export class DetectionServices{
         //log(this.detectionMethodPath)
     }
 
-    async solveAppointment(imagePath: string): Promise<string | null> {
+    async solveAppointment(imagePath: string, appointmentId:string): Promise<string | null> {
         
-        const command = `python3 ${this.detectionMethodPath} ${imagePath}`;
+        const command = `python3 ${this.detectionMethodPath} ${imagePath} ${appointmentId}`;
         log(`Executing command: ${command}`);
 
         try {
@@ -37,7 +37,7 @@ export class DetectionServices{
     
 
     async loadResult(detectionResultFolder:string){
-        const resultFolder = join(this.outputPath, detectionResultFolder);
+        const resultFolder = join(this.outputPath, detectionResultFolder+"/1");
         log(`Result Folder: ${resultFolder}`);
 
         const jsonFilePath = join(resultFolder, 'result.json'); 
