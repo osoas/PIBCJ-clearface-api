@@ -5,6 +5,7 @@ import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.erro
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { join } from 'path';
+import { z } from 'zod';
 
 
 
@@ -30,6 +31,11 @@ export class ImagesController {
     })) 
     @Post()
     async createImage(@UploadedFile() file:Express.Multer.File, @Body() body: any, @Res() res: Response) {
+        const { appointment_id } = z.object({
+            appointment_id: z.string({ message: 'Payload inválido' }).cuid('Payload inválido: id não é uuid'),
+
+        }).parse(body)
+        
         if (!file) {
             console.log(file)
             return res.status(400).json({ message: 'Nenhuma imagem enviada!' });
@@ -40,7 +46,7 @@ export class ImagesController {
         try {
 
             // Salvando no banco de dados
-            const image = await this.ImageService.create({ url: filePath });
+            const image = await this.ImageService.create({ url: filePath,appointmentId: appointment_id });
 
             console.log('Imagem armazenada em: \x1b[32', filePath,"\x1b[0");
             return res.status(201).json({ Description: 'Upload concluído com sucesso', image, body });

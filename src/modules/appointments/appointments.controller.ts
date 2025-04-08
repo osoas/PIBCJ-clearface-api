@@ -30,28 +30,24 @@ export class AppointmentsController {
             
         }).parse(req.user);
 
-        const {image_id} = z.object({
-            image_id:z.string({message:'Need to provide a image_id'}).cuid("image_id invalido (cuid)")
-        }).parse(req.body);
-
         try {
             
-            const image = await this.ImageService.returnByImageId(image_id)
+            // const image = await this.ImageService.returnByImageId(image_id)
 
-            log(`created appointment, displayed at: ${image.url}`)
+            // log(`created appointment, displayed at: ${image.url}`)
 
-            //Detect
-            const JSONResponse = await this.detectionService.solveAppointment(image.url,image.id)
-            // log(JSONResponse)
-            // const toJson:detectionPrefabJson = JSON.parse(JSONResponse)
+            // //Detect
+            // const JSONResponse = await this.detectionService.solveAppointment(image.url,image.id)
+            // // log(JSONResponse)
+            // // const toJson:detectionPrefabJson = JSON.parse(JSONResponse)
             
-            // log(toJson.created_folder)
+            // // log(toJson.created_folder)
 
-            //Load Detect Result
-            const detectionResult = await this.detectionService.loadResult(image.id)
-            log(detectionResult)
+            // //Load Detect Result
+            // const detectionResult = await this.detectionService.loadResult(image.id)
+            // log(detectionResult)
 
-            const result = await this.appointmentsService.create({ image_id,user_id:id, resultado:detectionResult });
+            const result = await this.appointmentsService.create({user_id:id, resultado:[]});
             
             res.status(201).json(result.CreatedAppointment);
         } catch (err) {

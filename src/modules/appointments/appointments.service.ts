@@ -4,13 +4,14 @@ import { log } from 'console';
 import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.error';
 import { UniqueIndexViolatedError } from 'src/shared/errors/UniqueIndexViolated';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
+import { ImagesService } from '../images/images.service';
 
 interface unloadInfo{
     CreatedAppointment:{
         id:string,
         created_at:Date
     },
-    ReferedImage:Image
+    ReferedImages:Image[]
 }
 @Injectable()
 export class AppointmentsService {
@@ -18,14 +19,6 @@ export class AppointmentsService {
     constructor(private prisma:PrismaService){}
 
     async create(data:Prisma.AppointmentUncheckedCreateInput):Promise<unloadInfo> {
-        const doesTheImageExist = await this.prisma.image.findUnique({
-            where:{
-                id:data.image_id
-            }
-        })
-        if(!doesTheImageExist){
-            throw new EntityDoesNotExists("Image",data.user_id)
-        }
         const doesTheUserExists = await this.prisma.user.findUnique({
             where:{
                 id:data.user_id
@@ -35,14 +28,6 @@ export class AppointmentsService {
             throw new EntityDoesNotExists("User",data.user_id)
         }
         
-        const TheresAlreadyAnAppointmentForThisImage = await this.prisma.appointment.findMany({
-            where:{
-                image_id:data.image_id
-            }
-        })
-        if(TheresAlreadyAnAppointmentForThisImage[0]){
-            throw new UniqueIndexViolatedError("Appointment","Image")
-        }
 
         const appointment = await this.prisma.appointment.create({
             data,
@@ -53,11 +38,16 @@ export class AppointmentsService {
             }
         });
 
+        const ReferedImages = await this.prisma.image.findMany({
+            where:{
+                appointmentId:appointment.id
+            }
+        })
         
 
         return {
             CreatedAppointment:appointment,
-            ReferedImage:doesTheImageExist
+            ReferedImages,
         };
     }
 

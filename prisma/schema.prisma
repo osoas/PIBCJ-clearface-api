@@ -32,15 +32,15 @@ model Appointment {
   id String @id @default(cuid())
   
   //Dados
-  resultado Json? 
+  resultado Json[] 
 
   //Relacionamento
   user_id String
   user User @relation(fields: [user_id], references: [id])
 
   //Imagem
-  image_id String @unique
-  image Image @relation(fields: [image_id], references: [id])
+  image_id Image[] //Many to Many Relation
+  
 
 
   //Datação
@@ -58,5 +58,6 @@ model Image{
 
 
   //Relacionamento
-  appointment Appointment[]
+  appointmentId String
+  appointment_ref Appointment @relation(fields: [appointmentId], references: [id])
 }
