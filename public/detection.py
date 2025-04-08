@@ -87,11 +87,11 @@ def process_image(image_path, model, consulta_id, conf=0.25):
     image_with_crosshairs = draw_crosshairs(image_path, detected_boxes, detected_classes)
     image_with_crosshairs.convert("RGB").save(os.path.join(output_folder, "detected_image.jpg"))
     
-    return json.dumps({"success": True, "created_folder": output_folder}, indent=4, ensure_ascii=False)
+    return os.path.join("detections", os.path.relpath(output_folder, start=os.path.join("detections")))
 
 def detect(image_path, consulta_id):
     """Runs acne detection on the given image with a specific consultation ID"""
-    model = YOLO("/home/smoveisserver/hercules/PIBIC_Jr/thierrir/API/PIBCJ-clearface-api/public/best.pt")
+    model = YOLO("C:/programacao/clear-face-api/public/best.pt")
 
     json_result = process_image(image_path, model, consulta_id)
     return json_result
@@ -104,5 +104,5 @@ if __name__ == "__main__":
     parser.add_argument("consult_id", type=str, help="ID of the consultation.")
     args = parser.parse_args()
     result = detect(args.image_path, args.consult_id)
-    print(result)
+    print(json.dumps({"path": result}))
 

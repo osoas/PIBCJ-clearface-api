@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, Res, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Res, UseGuards, Req, Put } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { z } from 'zod';
 import { Response, Request } from 'express';
@@ -13,7 +13,12 @@ import { PythonFileRunningError } from 'src/shared/errors/PythonFileRunninError'
 import { detectionPrefabJson } from 'src/types/interfaces/jsonResponseType';
 import { ImagesService } from '../images/images.service';
 import { randomUUID } from 'crypto';
+import { ExpectedAppointmentResult } from 'src/types/interfaces/expectedAppointmentResult';
+import { extractJsonFromPythonOutput } from 'src/shared/utils/extractJsonFromPython';
 
+interface sla{
+    path:string
+}
 @Controller('consultas')
 export class AppointmentsController {
     constructor(private appointmentsService: AppointmentsService,private detectionService:DetectionServices,private ImageService:ImagesService) {}
@@ -29,28 +34,24 @@ export class AppointmentsController {
             
         }).parse(req.user);
 
-        const {image_id} = z.object({
-            image_id:z.string({message:'Need to provide a image_id'}).cuid("image_id invalido (cuid)")
-        }).parse(req.body);
-
         try {
             
-            const image = await this.ImageService.returnByImageId(image_id)
+            // const image = await this.ImageService.returnByImageId(image_id)
 
-            log(`created appointment, displayed at: ${image.url}`)
+            // log(`created appointment, displayed at: ${image.url}`)
 
-            //Detect
-            const JSONResponse = await this.detectionService.solveAppointment(image.url,image.id)
-            // log(JSONResponse)
-            // const toJson:detectionPrefabJson = JSON.parse(JSONResponse)
+            // //Detect
+            // const JSONResponse = await this.detectionService.solveAppointment(image.url,image.id)
+            // // log(JSONResponse)
+            // // const toJson:detectionPrefabJson = JSON.parse(JSONResponse)
             
-            // log(toJson.created_folder)
+            // // log(toJson.created_folder)
 
-            //Load Detect Result
-            const detectionResult = await this.detectionService.loadResult(image.id)
-            log(detectionResult)
+            // //Load Detect Result
+            // const detectionResult = await this.detectionService.loadResult(image.id)
+            // log(detectionResult)
 
-            const result = await this.appointmentsService.create({ image_id,user_id:id, resultado:detectionResult });
+            const result = await this.appointmentsService.create({user_id:id, resultado:[]});
             
             res.status(201).json(result.CreatedAppointment);
         } catch (err) {
@@ -87,6 +88,43 @@ export class AppointmentsController {
         }
     }
 
+    @Put('solve')
+    async solveAppointment(@Req() req: Request, @Res() res: Response) {
+        const {image_id} = z.object({
+            image_id:z.string({message:"Payload invalido"}).cuid("payload invalido: id nao é cuid")
+        }).parse(req.body);
+        
+        try {
+
+            
+            const image = await this.ImageService.returnByImageId(image_id)
+            log(image.url)
+            
+            const appointment = await this.appointmentsService.findUnique(image.appointmentId)
+
+            const pyResponse = await this.detectionService.solveAppointment(image.url,appointment.id)
+            const pyResultAfterPatch = extractJsonFromPythonOutput(pyResponse)
+            
+            log("Stored file path relative to JSON:",pyResultAfterPatch?.path)
+            
+            //Load Detect Result
+            const detectionResult = await this.detectionService.loadResult(appointment.id,pyResultAfterPatch?.path)
+            log(detectionResult)
+
+            //update the appointment with the result
+            const updatedAppointment = await this.appointmentsService.addAppointmentResult(image.appointmentId,detectionResult)
+            
+            res.status(200).json({updatedAppointment});
+            
+        } catch (err) {
+            if (err instanceof EntityDoesNotExists) {
+                res.status(404).json({ message: err.message });
+            } else {
+                res.status(500).json({ message: "Internal server error",err:err.message });
+            }
+        }
+    }
+
     @Get(':id')
     async findAppointmentById(@Param('id') id: string, @Res() res: Response) {
         try {
@@ -100,4 +138,36 @@ export class AppointmentsController {
             }
         }
     }
+
+    @Get(':id/imagem/:image_index')
+    async findAppointmentResultImage(@Req() req:Request, @Res() res: Response) {
+        const {id,image_index} = z.object({
+            id:z.string({message:"Payload invalido"}).cuid("payload invalido: id nao é uuid"),
+            image_index:z.string({message:"payload invalido: image_index deve ser conversivel a inteiro"})
+        }).parse(req.params);
+
+        try{
+            const index = Number(image_index)
+            const appointment = await this.appointmentsService.findUnique(id);
+            const {
+                image,
+                iga_score,
+                image_path,
+                acne_quantity,
+                detected_classes
+              } = appointment.resultado[index] as unknown as ExpectedAppointmentResult;
+            
+            const imageBuffer = await this.detectionService.loadImageBufferResult(image_path)
+            res.setHeader('Content-Type', 'image/jpeg');
+            res.setHeader('Content-Disposition', `attachment; filename=resultimage.jpg`);
+            res.status(200).send(imageBuffer);
+        }catch(err){
+            if (err instanceof EntityDoesNotExists) {
+                res.status(404).json({ message: err.message, description: "Imagem não encontrada" });
+            } else {
+                res.status(500).json({ message: "Internal server error" , err:err.message});
+            }
+        }
+
+    }   
 }
