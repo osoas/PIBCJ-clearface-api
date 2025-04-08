@@ -594,6 +594,71 @@ export const swaggerDocument: OpenAPIObject = {
           }
         }
       }
+    },
+    '/consultas/solve': {
+      put: {
+      summary: 'Executa a detecção facial e atualiza o resultado da consulta',
+      description: 'Usa a imagem associada a uma consulta médica para realizar a detecção facial com YOLO e atualiza o campo de resultado da consulta com os dados processados.',
+      tags: ['Consultas'],
+      requestBody: {
+        required: true,
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                image_id: {
+                  type: 'string',
+                  format: 'cuid',
+                  example: 'clu23dz1x0000w1q8z8g4u8oi',
+                  description: 'ID da imagem associada à consulta a ser processada'
+                }
+              },
+              required: ['image_id']
+            }
+          }
+        }
+      },
+      responses: {
+        200: {
+          description: 'Consulta atualizada com o resultado da detecção',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Appointment'
+              }
+            }
+          }
+        },
+        404: {
+          description: 'Consulta ou imagem não encontrada',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  message: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        500: {
+          description: 'Erro interno ao processar a imagem',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  message: { type: 'string' },
+                  err: { type: 'string' }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
     }
     },
     "components": {

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, Res, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Res, UseGuards, Req, Put } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { z } from 'zod';
 import { Response, Request } from 'express';
@@ -14,7 +14,11 @@ import { detectionPrefabJson } from 'src/types/interfaces/jsonResponseType';
 import { ImagesService } from '../images/images.service';
 import { randomUUID } from 'crypto';
 import { ExpectedAppointmentResult } from 'src/types/interfaces/expectedAppointmentResult';
+import { extractJsonFromPythonOutput } from 'src/shared/utils/extractJsonFromPython';
 
+interface sla{
+    path:string
+}
 @Controller('consultas')
 export class AppointmentsController {
     constructor(private appointmentsService: AppointmentsService,private detectionService:DetectionServices,private ImageService:ImagesService) {}
@@ -84,6 +88,43 @@ export class AppointmentsController {
         }
     }
 
+    @Put('solve')
+    async solveAppointment(@Req() req: Request, @Res() res: Response) {
+        const {image_id} = z.object({
+            image_id:z.string({message:"Payload invalido"}).cuid("payload invalido: id nao é cuid")
+        }).parse(req.body);
+        
+        try {
+
+            
+            const image = await this.ImageService.returnByImageId(image_id)
+            log(image.url)
+            
+            const appointment = await this.appointmentsService.findUnique(image.appointmentId)
+
+            const pyResponse = await this.detectionService.solveAppointment(image.url,appointment.id)
+            const pyResultAfterPatch = extractJsonFromPythonOutput(pyResponse)
+            
+            log("Stored file path relative to JSON:",pyResultAfterPatch?.path)
+            
+            //Load Detect Result
+            const detectionResult = await this.detectionService.loadResult(appointment.id,pyResultAfterPatch?.path)
+            log(detectionResult)
+
+            //update the appointment with the result
+            const updatedAppointment = await this.appointmentsService.addAppointmentResult(image.appointmentId,detectionResult)
+            
+            res.status(200).json({updatedAppointment});
+            
+        } catch (err) {
+            if (err instanceof EntityDoesNotExists) {
+                res.status(404).json({ message: err.message });
+            } else {
+                res.status(500).json({ message: "Internal server error",err:err.message });
+            }
+        }
+    }
+
     @Get(':id')
     async findAppointmentById(@Param('id') id: string, @Res() res: Response) {
         try {
@@ -98,13 +139,15 @@ export class AppointmentsController {
         }
     }
 
-    @Get(':id/imagem')
+    @Get(':id/imagem/:image_index')
     async findAppointmentResultImage(@Req() req:Request, @Res() res: Response) {
-        const {id} = z.object({
-            id:z.string({message:"Payload invalido"}).cuid("payload invalido: id nao é uuid")}
-        ).parse(req.params);
+        const {id,image_index} = z.object({
+            id:z.string({message:"Payload invalido"}).cuid("payload invalido: id nao é uuid"),
+            image_index:z.string({message:"payload invalido: image_index deve ser conversivel a inteiro"})
+        }).parse(req.params);
 
         try{
+            const index = Number(image_index)
             const appointment = await this.appointmentsService.findUnique(id);
             const {
                 image,
@@ -112,7 +155,7 @@ export class AppointmentsController {
                 image_path,
                 acne_quantity,
                 detected_classes
-              } = appointment.resultado as unknown as ExpectedAppointmentResult;
+              } = appointment.resultado[index] as unknown as ExpectedAppointmentResult;
             
             const imageBuffer = await this.detectionService.loadImageBufferResult(image_path)
             res.setHeader('Content-Type', 'image/jpeg');

@@ -5,6 +5,8 @@ import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.erro
 import { UniqueIndexViolatedError } from 'src/shared/errors/UniqueIndexViolated';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
 import { ImagesService } from '../images/images.service';
+import { ExpectedAppointmentResult } from 'src/types/interfaces/expectedAppointmentResult';
+import { InputJsonValue } from '@prisma/client/runtime/library';
 
 interface unloadInfo{
     CreatedAppointment:{
@@ -72,7 +74,40 @@ export class AppointmentsService {
             }
         });
     }
-
+    async addAppointmentResult(appointment_id: string, resultado: ExpectedAppointmentResult) {
+        const appointment = await this.prisma.appointment.findUnique({
+            where: { id: appointment_id },
+        });
+    
+        if (!appointment) {
+            throw new EntityDoesNotExists("Appointment", appointment_id);
+        }
+    
+        const current = appointment.resultado ?? [];
+    
+        if (!Array.isArray(current)) {
+            throw new Error("Campo 'resultado' não é uma lista válida");
+        }
+    
+        const newList = [...(current as unknown as ExpectedAppointmentResult[]), resultado];
+    
+        const updated = await this.prisma.appointment.update({
+            where: { id: appointment_id },
+            data: {
+                resultado: JSON.parse(JSON.stringify(newList)), // garante serialização válida
+                updated_at:new Date()
+            },
+            select:{
+                id:true,
+                resultado:true,
+                created_at:true,
+                updated_at:true,
+                user_id:false
+            }
+        });
+    
+        return updated;
+    }
     async findUnique(id:string){
         const appointment = await this.prisma.appointment.findUnique({
             where:{

@@ -37,8 +37,8 @@ export class DetectionServices{
     }
     
 
-    async loadResult(detectionResultFolder:string){
-        const resultFolder = join(this.outputPath, detectionResultFolder+"/1");
+    async loadResult(detectionResultFolder:string,pageFolder:string){
+        const resultFolder = this.sourcePath+pageFolder
         log(`Result Folder: ${resultFolder}`);
 
         const jsonFilePath = join(resultFolder, 'result.json'); 
