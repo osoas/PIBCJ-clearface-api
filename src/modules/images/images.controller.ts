@@ -95,8 +95,14 @@ export class ImagesController {
         const imageList = parseList as refImage[];
         try {
             const result = await this.ImageService.getImagesBuffers(imageList);
-            res.status(200).json(result);
+            
+            // Transforma buffers em base64 e monta data URL
+            const base64Images = result.map((buffer: Buffer) => {
+                const base64 = buffer.toString('base64');
+                return `data:image/png;base64,${base64}`; // ou image/jpeg, dependendo do seu formato
+            });
 
+            res.status(200).json(base64Images);
         } catch (error) {
             res.status(500).json({ message: "Erro ao processar as imagens", error: error.message });
         }

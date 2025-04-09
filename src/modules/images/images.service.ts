@@ -52,7 +52,7 @@ export class ImagesService {
     async getImagesBuffers(images:refImage[]):Promise<Buffer[]>{
         return await Promise.all(images.map((image, index) => {
                 
-                const imageFilePath = join(this.sourcePath, image.url);
+                const imageFilePath = image.url
                 log(`Image Path Folder: ${imageFilePath}`);
                 log(`Image at ${index} is ${image}`)
                 

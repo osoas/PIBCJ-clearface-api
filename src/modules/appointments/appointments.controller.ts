@@ -15,7 +15,7 @@ import { ImagesService } from '../images/images.service';
 import { randomUUID } from 'crypto';
 import { ExpectedAppointmentResult } from 'src/types/interfaces/expectedAppointmentResult';
 import { extractJsonFromPythonOutput } from 'src/shared/utils/extractJsonFromPython';
-import { refImage, refImageType } from 'src/types/interfaces/refImage';
+
 
 interface sla{
     path:string
