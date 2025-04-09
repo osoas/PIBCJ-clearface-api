@@ -68,7 +68,11 @@ export class AppointmentsService {
         if(!doesTheUserExists){
             throw new EntityDoesNotExists("User",user_id)
         }
-        return await this.prisma.appointment.findMany({
+
+
+
+
+        const manyResult = await this.prisma.appointment.findMany({
             where:{
                 user_id
             },
@@ -79,6 +83,25 @@ export class AppointmentsService {
                 created_at:true
             }
         });
+
+        // Organiza os dados no formato desejado
+        const formatted = manyResult.flatMap((appointment) =>
+            appointment.resultado.map((resultItem) => {
+                const res = resultItem as unknown as ExpectedAppointmentResult;
+                return{
+                    day: appointment.created_at,
+                    value: res.iga_score
+                }
+
+            })
+          );
+
+        return {
+            appointments: formatted,
+            manyResult:manyResult,
+            count: manyResult.length
+        };
+
     }
 
     async addAppointmentResult(appointment_id: string, resultado: ExpectedAppointmentResult) {
