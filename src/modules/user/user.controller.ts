@@ -91,23 +91,23 @@ export class UserController {
 
     @Put("password")
     async updatePasswordByRecCode(@Req() req: Request, @Res() res: Response) {
-        const { refCode, newPassword } = z.object({
-            refCode: z.string({message:"Voce precisa forneceer uma string com o código"}),
+        const { refCode, newPassword,passInfo} = z.object({
+            refCode: z.string({message:"Voce precisa fornecer uma string com o código"}),
             newPassword: z.string({message:"Voce precisa fornecer uma nova senha"}).min(6, "A senha deve ter no mínimo 6 caracteres"),
-            
+            passInfo:z.string({message:"Voce precisa fornecer uma string com o código"})
         }).parse(req.body);
 
-        const recString = req.cookies["pass_info"]
-        console.log(refCode)
+        // const recString = req.cookies["pass_info"]
+        //console.log(refCode)
         
         try {
-            await this.UserService.updatePasswordByRecCode(recString, newPassword, refCode);
+            await this.UserService.updatePasswordByRecCode(passInfo, newPassword, refCode);
             res.status(200).json({ message: "Password updated successfully" });
         } catch (err) {
             if (err instanceof EntityDoesNotExists || err instanceof ValidationError) {
                 res.status(400).json({ message: err.message });
             } else {
-                res.status(500).json({ message: "Internal server error" });
+                res.status(500).json({ message: "Internal server error",err:err.message });
             }
         }
     }

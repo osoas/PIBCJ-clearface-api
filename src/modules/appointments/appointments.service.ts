@@ -7,6 +7,8 @@ import { PrismaService } from 'src/shared/prisma/prisma.service';
 import { ImagesService } from '../images/images.service';
 import { ExpectedAppointmentResult } from 'src/types/interfaces/expectedAppointmentResult';
 import { InputJsonValue } from '@prisma/client/runtime/library';
+import { refImage, refImageType } from 'src/types/interfaces/refImage';
+import { interleaveByParity } from 'src/shared/utils/interlayByParity';
 
 interface unloadInfo{
     CreatedAppointment:{
@@ -14,6 +16,10 @@ interface unloadInfo{
         created_at:Date
     },
     ReferedImages:Image[]
+}
+interface appointmentReturnAsList{
+    appointment:Partial<Appointment>,
+    imageClassList:refImage[]
 }
 @Injectable()
 export class AppointmentsService {
@@ -74,6 +80,7 @@ export class AppointmentsService {
             }
         });
     }
+
     async addAppointmentResult(appointment_id: string, resultado: ExpectedAppointmentResult) {
         const appointment = await this.prisma.appointment.findUnique({
             where: { id: appointment_id },
@@ -108,7 +115,9 @@ export class AppointmentsService {
     
         return updated;
     }
-    async findUnique(id:string){
+
+
+    async findUnique(id:string):Promise<appointmentReturnAsList> {
         const appointment = await this.prisma.appointment.findUnique({
             where:{
                 id
@@ -123,6 +132,42 @@ export class AppointmentsService {
         if(!appointment){
             throw new EntityDoesNotExists("Appointment",id)
         }
-        return appointment;
+        var getImageListedToAppointment = await this.prisma.image.findMany({
+            where:{
+                appointmentId:id
+            },
+            select:{
+                id:true,
+                created_at:false,
+                updated_at:false,
+                appointmentId:false,
+                url:true
+            }
+        })
+        
+        const selList = getImageListedToAppointment.map((item)=>{
+            const {id,url} = item
+            return {
+                id,url,
+                appointmentId:appointment.id,
+                type:refImageType.uploaded
+            }
+        }) as refImage[]
+        const getResultImagesFromApppointment:refImage[] = appointment.resultado?.map((item:unknown,id:number) => {
+            const parsedItem = item as ExpectedAppointmentResult;
+
+            return {
+                id,
+                appointmentId: appointment.id,
+                url: parsedItem.image_path,
+                type:refImageType.detected
+            }
+        })
+
+        return {
+            appointment,
+            imageClassList:interleaveByParity(selList,getResultImagesFromApppointment)
+        };
     }
 }
+

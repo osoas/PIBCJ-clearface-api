@@ -9,13 +9,34 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  
   app.enableCors({
-    origin: '*', // Permite qualquer origem
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        'http://localhost:8081',
+        'http://200.129.17.134:3456',
+        'null' // Para permitir testes via file://
+      ];
+  
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Not allowed by CORS: ${origin}`));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
     credentials: true
   });
+
+  app.use((req, res, next) => {
+    console.log(`Nova requisição recebida: ${req.method} ${req.url} `);
+    log(req.body)
+    next();
+  });
+  
+ 
 
   //Setup do swagger
   const config = new DocumentBuilder()

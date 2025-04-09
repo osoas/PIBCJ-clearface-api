@@ -100,7 +100,7 @@ export class AppointmentsController {
             const image = await this.ImageService.returnByImageId(image_id)
             log(image.url)
             
-            const appointment = await this.appointmentsService.findUnique(image.appointmentId)
+            const {appointment} = await this.appointmentsService.findUnique(image.appointmentId)
 
             const pyResponse = await this.detectionService.solveAppointment(image.url,appointment.id)
             const pyResultAfterPatch = extractJsonFromPythonOutput(pyResponse)
@@ -128,8 +128,8 @@ export class AppointmentsController {
     @Get(':id')
     async findAppointmentById(@Param('id') id: string, @Res() res: Response) {
         try {
-            const appointment = await this.appointmentsService.findUnique(id);
-            res.status(200).json(appointment);
+            const result = await this.appointmentsService.findUnique(id);
+            res.status(200).json(result);
         } catch (err) {
             if (err instanceof EntityDoesNotExists) {
                 res.status(404).json({ message: err.message });
@@ -148,7 +148,7 @@ export class AppointmentsController {
 
         try{
             const index = Number(image_index)
-            const appointment = await this.appointmentsService.findUnique(id);
+            const {appointment} = await this.appointmentsService.findUnique(id);
             const {
                 image,
                 iga_score,
@@ -157,6 +157,7 @@ export class AppointmentsController {
                 detected_classes
               } = appointment.resultado[index] as unknown as ExpectedAppointmentResult;
             
+        
             const imageBuffer = await this.detectionService.loadImageBufferResult(image_path)
             res.setHeader('Content-Type', 'image/jpeg');
             res.setHeader('Content-Disposition', `attachment; filename=resultimage.jpg`);

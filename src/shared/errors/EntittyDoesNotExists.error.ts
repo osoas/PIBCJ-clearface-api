@@ -14,3 +14,4 @@ export class EntityDoesNotExists extends Error {
         this.name = 'EntityDoesNotExists';
     }
 }
+
