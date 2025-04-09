@@ -4,6 +4,8 @@ import { COOKIE_SECRET, HOST, PORT } from './shared/lib/env';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { swaggerDocument } from './types/swagger';
 import * as cookieParser from 'cookie-parser';
+import { ValidationPipe } from '@nestjs/common';
+import { log } from 'console';
 
 
 async function bootstrap() {

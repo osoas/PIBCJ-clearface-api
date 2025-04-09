@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, Res, UseGuards, Req, Put } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Res, UseGuards, Req, Put, Query, Patch } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { z } from 'zod';
 import { Response, Request } from 'express';
@@ -15,6 +15,7 @@ import { ImagesService } from '../images/images.service';
 import { randomUUID } from 'crypto';
 import { ExpectedAppointmentResult } from 'src/types/interfaces/expectedAppointmentResult';
 import { extractJsonFromPythonOutput } from 'src/shared/utils/extractJsonFromPython';
+import { refImage, refImageType } from 'src/types/interfaces/refImage';
 
 interface sla{
     path:string
@@ -171,4 +172,7 @@ export class AppointmentsController {
         }
 
     }   
+
+    
+
 }

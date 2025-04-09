@@ -659,8 +659,104 @@ export const swaggerDocument: OpenAPIObject = {
         }
       }
     }
-    }
     },
+    "/images/buffers/{appointmentId}": {
+      "patch": {
+        "tags": ["imagens"],
+        "summary": "Retorna buffers de imagens associadas a uma consulta",
+        "operationId": "getImageBuffersByAppointment",
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da consulta para a qual as imagens estão associadas"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "parseList": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "oneOf": [
+                            { "type": "string" },
+                            { "type": "number" }
+                          ],
+                          "description": "ID da imagem"
+                        },
+                        "appointmentId": {
+                          "type": "string",
+                          "description": "ID da consulta médica"
+                        },
+                        "url": {
+                          "type": "string",
+                          "description": "URL da imagem armazenada"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": ["detected", "uploaded"],
+                          "description": "Tipo da imagem (detectada ou enviada)"
+                        }
+                      },
+                      "required": ["id", "appointmentId", "url", "type"]
+                    }
+                  }
+                },
+                "required": ["parseList"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Buffers de imagem retornados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Buffer da imagem em base64 ou binário"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao processar as imagens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    },
+    
     "components": {
     "schemas": {
       "User": {
