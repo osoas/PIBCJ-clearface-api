@@ -59,6 +59,7 @@ export class AppointmentsService {
         };
     }
 
+    
     async findManyByUser(user_id:string) {
         const doesTheUserExists = await this.prisma.user.findUnique({
             where:{
