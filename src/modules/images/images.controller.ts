@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, Res, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Res, UseInterceptors, UploadedFile, Patch, Req } from '@nestjs/common';
 import { ImagesService } from './images.service';
 import { Response } from 'express';
 import { EntityDoesNotExists } from 'src/shared/errors/EntittyDoesNotExists.error';
@@ -6,6 +6,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { join } from 'path';
 import { z } from 'zod';
+import { refImage } from 'src/types/interfaces/refImage';
 
 
 
@@ -68,6 +69,36 @@ export class ImagesController {
             } else {
                 res.status(500).json({ message: err.message });
             }
+        }
+    }
+
+    @Patch('buffers/:appointmentId')
+    async getImageBuffersByAppointment(@Req() req:Request, @Res() res:Response) {
+        const { parseList } = z.object({
+            parseList: z.array(z.object({
+                id: z.union([z.string(), z.number()], {
+                    message: "Payload inválido: id deve ser string ou number"
+                }),
+                appointmentId: z.string({
+                    message: "Payload inválido: appointmentId deve ser string"
+                }),
+                url: z.string({
+                    message: "Payload inválido: url deve ser string"
+                }),
+                type: z.enum(["detected", "uploaded"], {
+                    message: "Payload inválido: type deve ser detected ou uploaded"
+                })
+            }))
+        }).parse(req.body);
+
+
+        const imageList = parseList as refImage[];
+        try {
+            const result = await this.ImageService.getImagesBuffers(imageList);
+            res.status(200).json(result);
+
+        } catch (error) {
+            res.status(500).json({ message: "Erro ao processar as imagens", error: error.message });
         }
     }
 }
