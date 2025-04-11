@@ -1,5 +1,5 @@
 export function extractJsonFromPythonOutput(output: string): any | null {
-    const jsonMatch = output.match(/{[\s\S]*}$/); // Pega o último JSON no final da string
+    const jsonMatch = output.match(/{[\s\S]*}$/);
   
     if (!jsonMatch) return null;
   

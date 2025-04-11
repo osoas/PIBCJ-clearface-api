@@ -109,13 +109,18 @@ export class AppointmentsController {
             log("Stored file path relative to JSON:",pyResultAfterPatch?.path)
             
             //Load Detect Result
-            const detectionResult = await this.detectionService.loadResult(appointment.id,pyResultAfterPatch?.path)
+            const detectionResult = await this.detectionService.loadResult(appointment.id,pyResultAfterPatch?.path) as ExpectedAppointmentResult
             log(detectionResult)
-
+            
             //update the appointment with the result
             const updatedAppointment = await this.appointmentsService.addAppointmentResult(image.appointmentId,detectionResult)
             
-            res.status(200).json({updatedAppointment});
+            const bufferResult = await this.detectionService.loadImageBufferResult(detectionResult.image_path)
+             // Transforma buffers em base64 e monta data URL
+            const base64 = bufferResult.toString('base64');
+            
+
+            res.status(200).json({updatedAppointment,resultImage:`data:image/png;base64,${base64}`});
             
         } catch (err) {
             if (err instanceof EntityDoesNotExists) {
