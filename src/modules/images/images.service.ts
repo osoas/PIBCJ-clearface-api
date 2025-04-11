@@ -57,13 +57,18 @@ export class ImagesService {
                 log(`Image at ${index} is ${image}`)
                 
                 if (!existsSync(imageFilePath)) {
-                    // throw new Error(`Arquivo de imagem não encontrado em: ${imageFilePath}`);
-                }
-
-                try {
-                    return readFileSync(imageFilePath);
-                } catch (error) {
-                    throw new Error(`Erro ao ler arquivo de imagem: ${error.message}`);
+                    try {
+                        return readFileSync(this.sourcePath+"public/notFoundImage.png")
+                    } catch (error) {
+                        throw new Error(`Imagem Padrão Não encontrada: ${error.message}`);
+                    }
+                    
+                }else{
+                    try {
+                        return readFileSync(imageFilePath);
+                    } catch (error) {
+                        throw new Error(`Erro ao ler arquivo de imagem: ${error.message}`);
+                    }
                 }
             })
         )
