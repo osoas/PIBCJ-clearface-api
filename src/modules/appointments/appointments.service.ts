@@ -9,6 +9,7 @@ import { ExpectedAppointmentResult } from 'src/types/interfaces/expectedAppointm
 import { InputJsonValue } from '@prisma/client/runtime/library';
 import { refImage, refImageType } from 'src/types/interfaces/refImage';
 import { interleaveByParity } from 'src/shared/utils/interlayByParity';
+import { DetectionServices } from './detections.service';
 
 interface unloadInfo{
     CreatedAppointment:{
@@ -24,7 +25,7 @@ interface appointmentReturnAsList{
 @Injectable()
 export class AppointmentsService {
 
-    constructor(private prisma:PrismaService){}
+    constructor(private prisma:PrismaService, private detectService:DetectionServices,private imageService:ImagesService){}
 
     async create(data:Prisma.AppointmentUncheckedCreateInput):Promise<unloadInfo> {
         const doesTheUserExists = await this.prisma.user.findUnique({
@@ -165,28 +166,39 @@ export class AppointmentsService {
                 created_at:false,
                 updated_at:false,
                 appointmentId:false,
+
                 url:true
             }
         })
         
-        const selList = getImageListedToAppointment.map((item)=>{
+        const selList = await Promise.all(getImageListedToAppointment.map(async(item)=>{
             const {id,url} = item
+            const ImageBuffer = await this.imageService.getImagesBuffers([{
+                url,id,type:refImageType.uploaded,appointmentId:appointment.id,imageBase:undefined
+            }])
             return {
                 id,url,
                 appointmentId:appointment.id,
-                type:refImageType.uploaded
+                type:refImageType.uploaded,
+                imageBase:`data:image/png;base64,${ImageBuffer[0].toString('base64')}`
             }
-        }) as refImage[]
-        const getResultImagesFromApppointment:refImage[] = appointment.resultado?.map((item:unknown,id:number) => {
-            const parsedItem = item as ExpectedAppointmentResult;
-
-            return {
-                id,
-                appointmentId: appointment.id,
-                url: parsedItem.image_path,
-                type:refImageType.detected
-            }
-        })
+        })) as refImage[]
+        
+        
+        const getResultImagesFromApppointment:refImage[] = await 
+        Promise.all(
+            appointment.resultado?.map(async(item:unknown,id:number) => {
+                const parsedItem = item as ExpectedAppointmentResult;
+                const loadFile = await this.detectService.loadImageBufferResult(parsedItem.image_path)
+                return {
+                    id,
+                    appointmentId: appointment.id,
+                    url: parsedItem.image_path,
+                    type:refImageType.detected,
+                    imageBase:`data:image/png;base64,${loadFile.toString('base64')}`
+                }
+            })
+        )
 
         return {
             appointment,

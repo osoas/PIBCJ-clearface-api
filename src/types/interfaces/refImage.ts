@@ -7,5 +7,6 @@ export interface refImage{
     id:string | number,
     appointmentId:string,
     url:string,
-    type:refImageType
+    type:refImageType,
+    imageBase:string | undefined
 }
