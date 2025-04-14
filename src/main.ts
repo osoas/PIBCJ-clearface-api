@@ -6,30 +6,26 @@ import { swaggerDocument } from './types/swagger';
 import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { log } from 'console';
+import { readFileSync } from 'fs';
 
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const httpsOptions = {
+    key: readFileSync('cert.key'),
+    cert: readFileSync('cert.cert'),
+  };
+
+  const app = await NestFactory.create(AppModule,{
+    httpsOptions
+  });
+  
   
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   
   app.enableCors({
-    origin: (origin, callback) => {
-      const allowedOrigins = [
-        'http://localhost:8081',
-        'http://200.129.17.134:3456',
-        'null' // Para permitir testes via file://
-      ];
-  
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`Not allowed by CORS: ${origin}`));
-      }
-    },
+    origin: '*', // ⚠️ Aceita requisições de qualquer origem
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
-    credentials: true
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   app.use((req, res, next) => {
